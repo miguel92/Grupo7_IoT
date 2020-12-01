@@ -31,3 +31,6 @@
 *.out
 *.app
 *.bin
+
+# Archivo config
+config.h
