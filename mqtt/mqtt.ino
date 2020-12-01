@@ -17,7 +17,8 @@ ADC_MODE(ADC_VCC);
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-unsigned long lastMsg2 = 0;
+unsigned long tiempoEsperaActu = 600000;
+unsigned long lastActu = 0;
 #define MSG_BUFFER_SIZE	(50)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
@@ -28,6 +29,7 @@ int estado_int=HIGH;     // por defecto HIGH (PULLUP). Cuando se pulsa se pone a
 volatile unsigned long ahora=0;
 volatile unsigned long ultima_int = 0;
 volatile boolean pulsado = false;
+unsigned int ESPID = ESP.getChipId();
 
 void progreso_OTA(int,int);
 void final_OTA();
@@ -129,6 +131,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("\"level\" key not found in JSON");
     }
   } // if topic
+  else if(strcmp(topic,"infind/GRUPO7/ESP418957/FOTA")==1){
+      Serial.print("Actualizamos");
+    }
   else
   {
     Serial.println("Error: Topic desconocido");
@@ -271,6 +276,8 @@ void setup() {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  Serial.print("ID del CHIP ESP: ");
+  Serial.println(ESPID);
   actualizacionOTA();
   
   //Se configura el boton flash con interrupcion para permitir actualizar cuando se pulse al menos 5 seg
@@ -285,8 +292,7 @@ void loop() {
   }
   client.loop();
 
-  unsigned long now1 = millis();
-  unsigned long now2 = millis();
+  unsigned long now = millis();
   if (pulsado) 
   {
     
@@ -302,12 +308,15 @@ void loop() {
    Serial.println(" ms");
    
   }
-  if (now2 - lastMsg2 > 30000){ // Se envian los datos cada 30 segundos
-      lastMsg2 = now2;
+  if (now - lastMsg > 30000){ // Se envian los datos cada 30 segundos
+      lastMsg = now;
       String datosJSON = publicarDatos();
       Serial.println(datosJSON.c_str());
       client.publish("infind/GRUPO7/datos", datosJSON.c_str());
     }
   
-  
+  if(now - lastActu > tiempoEsperaActu){
+    lastActu = now;
+    actualizacionOTA();
+    }
 }
