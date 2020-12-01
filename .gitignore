@@ -31,4 +31,4 @@
 *.out
 *.app
 *.bin
-config.h
+mqtt/config.h
