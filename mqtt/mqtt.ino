@@ -10,7 +10,8 @@
 #include <ArduinoJson.h>
 #include <ESP8266httpUpdate.h>
 #include "config.h"
-
+#include "Button2.h";
+#define BUTTON_PIN  0
 // Update these with values suitable for your network.
 ADC_MODE(ADC_VCC);
 
@@ -23,7 +24,7 @@ unsigned long lastActu = 0;
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 DHTesp dht;
-int boton_flash=0;       // GPIO0 = boton flash
+//int boton_flash=0;       // GPIO0 = boton flash
 int estado_polling=HIGH; // por defecto HIGH (PULLUP). Cuando se pulsa se pone a LOW
 int estado_int=HIGH;     // por defecto HIGH (PULLUP). Cuando se pulsa se pone a LOW
 volatile unsigned long ahora=0;
@@ -36,25 +37,7 @@ void final_OTA();
 void inicio_OTA();
 void error_OTA(int);
 
-
-//Interrupcion
-ICACHE_RAM_ATTR void RTI() {
-  int lectura=digitalRead(boton_flash);
-  ahora= millis();
-  // descomentar para eliminar rebotes
-  if(lectura==estado_int || ahora-ultima_int<50) return; // filtro rebotes 50ms
-  if(lectura==LOW)
-  { 
-   ultima_int = millis();
-   estado_int=LOW;
-  }
-  else
-  {
-   pulsado = true;
-   estado_int=HIGH;
-  }
-  
-}
+Button2 button = Button2(BUTTON_PIN);
 
 struct registro_datos { // Estructura de datos que recoge todas las lecturas necesarias para el topic de Datos
   float temperatura;
@@ -131,8 +114,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("\"level\" key not found in JSON");
     }
   } // if topic
-  else if(strcmp(topic,"infind/GRUPO7/ESP418957/FOTA")==1){
-      Serial.print("Actualizamos");
+
+  snprintf(msg, 128, "infind/GRUPO7/ESP%d/FOTA", ESPID);
+  
+  if(strcmp(topic,msg)==0){
+      actualizacionOTA();
     }
   else
   {
@@ -162,6 +148,10 @@ void reconnect() {
       client.publish(willTopic, online, true);
       Serial.println("connected");
       client.subscribe("infind/GRUPO7/led/cmd");
+      
+      snprintf(msg, 128, "infind/GRUPO7/ESP%d/FOTA", ESPID); // Suscripción a actualizaciones
+      client.subscribe(msg);
+      
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -269,6 +259,16 @@ void actualizacionOTA(){
       break;
     }
   }
+  
+void longpress(Button2& btn) {
+    unsigned int time = btn.wasPressedFor();
+    
+    if (time > 5000) {
+        Serial.print("Pulsación larga de 5 segundos: Se va a lanzar la actualización ");
+        actualizacionOTA();
+        
+    }
+}
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   dht.setup(5, DHTesp::DHT11);
@@ -281,8 +281,7 @@ void setup() {
   actualizacionOTA();
   
   //Se configura el boton flash con interrupcion para permitir actualizar cuando se pulse al menos 5 seg
-  pinMode(boton_flash, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(boton_flash), RTI, CHANGE);
+  button.setLongClickHandler(longpress);
 
 }
 
@@ -291,23 +290,10 @@ void loop() {
     reconnect();
   }
   client.loop();
-
+  button.loop();
+  
   unsigned long now = millis();
-  if (pulsado) 
-  {
-    
-   pulsado = false;
-   if(ahora-ultima_int >= 5000){
-    actualizacionOTA();
-    }
-   Serial.print("Int en: ");
-   Serial.print(ahora);
-   Serial.println(" ms");
-   Serial.print("Int dura: ");
-   Serial.print(ahora-ultima_int);
-   Serial.println(" ms");
-   
-  }
+
   if (now - lastMsg > 30000){ // Se envian los datos cada 30 segundos
       lastMsg = now;
       String datosJSON = publicarDatos();
@@ -318,5 +304,5 @@ void loop() {
   if(now - lastActu > tiempoEsperaActu){
     lastActu = now;
     actualizacionOTA();
-    }
+  }
 }
