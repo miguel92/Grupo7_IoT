@@ -32,5 +32,5 @@
 *.app
 *.bin
 
-# Archivo config
-config.h
+*.h
+
