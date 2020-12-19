@@ -32,6 +32,10 @@ volatile unsigned long ultima_int = 0;
 volatile boolean pulsado = false;
 unsigned int ESPID = ESP.getChipId();
 
+//cambios de intensidad
+int valor_previo=-1;
+volatile int velocidad_anterior=-1;
+
 void progreso_OTA(int,int);
 void final_OTA();
 void inicio_OTA();
@@ -101,17 +105,40 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else
     if(root.containsKey("level"))  // comprobar si existe el campo/clave que estamos buscando
     {
-     int valor = root["level"];
-     Serial.print("Mensaje OK, level = ");
-     Serial.println(valor);
-     
-     analogWrite(BUILTIN_LED,((100-valor)*1023/100)); // Se manda el valor analogico al LED PWM para variar su intensidad. Como el valor 0 es maxima intensidad y 1023 es apagado, hacemos la conversion para que vaya de 0 a 100(de menos a mas intensidad)
-     client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status
+      int valor = root["level"];
+      
+      if(velocidad_anterior!=-1){  //compruebo si ya se ha definido una velocidad de cambio de intensidad
+        int velocidad=velocidad_anterior;
+        cambioIntensidadGradual(valor, velocidad);
+      }
+      else{ //en caso de que la velocidad no haya sido definida con anterioridad
+        cambioIntensidadGradual(valor, 1);
+      }
+       
     }
     else
     {
-      Serial.print("Error : ");
-      Serial.println("\"level\" key not found in JSON");
+      //no existe el campo level, existe la posibilidad de que se haya modificado la velocidad, para ello comprobamos si existe el campo speed
+      
+      if(root.containsKey("speed")){    //se ha realizado un cambio de velocidad
+        int velocidad = root["speed"];
+
+        if(valor_previo!=-1){ //existe un valor de intensidad previo
+          cambioIntensidadGradual(valor_previo, velocidad);
+        }
+        else{ //no existe valor previo de intensidad, le damos el valor 50 por defecto
+          cambioIntensidadGradual(50, velocidad);
+        }
+ 
+        
+      }
+      else{
+       Serial.print("Error : ");
+       Serial.println("Neither \"level\" nor \"speed\" key was found in JSON");
+      }
+
+      
+     
     }
   } // if topic
 
@@ -127,6 +154,50 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   free(mensaje); // libero memoria
 }
+
+
+void cambioIntensidadGradual(int valor, int vel){
+
+     Serial.print("Mensaje OK, level = ");
+     Serial.println(valor);
+    
+     int velocidadCambio =vel ;
+    
+    if(valor_previo==-1){
+      analogWrite(BUILTIN_LED,((100-valor)*1023/100)); // Se manda el valor analogico al LED PWM para variar su intensidad. Como el valor 0 es maxima intensidad y 1023 es apagado, hacemos la conversion para que vaya de 0 a 100(de menos a mas intensidad)
+      client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status 
+    }
+    else{
+      
+      if(valor-valor_previo>0){
+         //subimos porcentaje de intensidad de luz LED 
+         //Ej: valor= 10, valor_previo= 1
+          int j=valor_previo;
+          while(j<=valor){
+             delay(10); // Cada 10 ms se modifica la intensidad del LED a la velocidad descrita en velocidadCambio
+             analogWrite(BUILTIN_LED,((100-j)*1023/100)); // Se manda el valor analogico al LED PWM para variar su intensidad. Como el valor 0 es maxima intensidad y 1023 es apagado, hacemos la conversion para que vaya de 0 a 100(de menos a mas intensidad)
+             j= j + velocidadCambio;
+          }
+           analogWrite(BUILTIN_LED,((100-valor)*1023/100)); //hacemos esto para supuesto en que la velocidad no sea multiplo del valor, para que el LED quede exactamente en el valor indicado.
+      }
+      else{
+          //bajamos porcentaje de intensidad de luz LED 
+          //Ej: valor= 0 ,valor_previo= 9
+          int j=valor_previo;
+          while(j>=valor){
+              delay(10); // Cada 10 ms se modifica la intensidad del LED a la velocidad descrita en velocidadCambio
+              analogWrite(BUILTIN_LED,((100-j)*1023/100)); // Se manda el valor analogico al LED PWM para variar su intensidad. Como el valor 0 es maxima intensidad y 1023 es apagado, hacemos la conversion para que vaya de 0 a 100(de menos a mas intensidad)
+              j=j - velocidadCambio;
+          }
+          analogWrite(BUILTIN_LED,((100-valor)*1023/100)); //hacemos esto para supuesto en que la velocidad no sea multiplo del valor, para que el LED quede exactamente en el valor indicado.
+      }
+     
+    }
+    client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status
+     valor_previo = valor;
+     velocidad_anterior=velocidadCambio;
+}
+
 
 void reconnect() {
   // Loop until we're reconnected
