@@ -162,10 +162,11 @@ void cambioIntensidadGradual(int valor, int vel){
      Serial.println(valor);
     
      int velocidadCambio =vel ;
-    
+     snprintf(msg, 128, "infind/GRUPO7/ESP%d/led/status", ESPID);
+     
     if(valor_previo==-1){
       analogWrite(BUILTIN_LED,((100-valor)*1023/100)); // Se manda el valor analogico al LED PWM para variar su intensidad. Como el valor 0 es maxima intensidad y 1023 es apagado, hacemos la conversion para que vaya de 0 a 100(de menos a mas intensidad)
-      client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status 
+      client.publish(msg,serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status 
     }
     else{
       
@@ -193,7 +194,8 @@ void cambioIntensidadGradual(int valor, int vel){
       }
      
     }
-    client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status
+    
+    client.publish(msg,serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status
      valor_previo = valor;
      velocidad_anterior=velocidadCambio;
 }
