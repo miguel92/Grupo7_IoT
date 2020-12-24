@@ -34,6 +34,8 @@ unsigned int ESPID = ESP.getChipId();
 
 //cambios de intensidad
 int valor_previo=-1;
+volatile int valor_led_actual = 100;
+volatile int valor_led_anterior = 0;
 volatile int velocidad_anterior=-1;
 
 void progreso_OTA(int,int);
@@ -53,6 +55,11 @@ struct registro_datos { // Estructura de datos que recoge todas las lecturas nec
   String ip;
   long rssi;
 } datos;
+
+struct registro_conexion {
+  String chipID;
+  bool online;
+  } conexion_datos;
 
 void setup_wifi() {
 
@@ -147,10 +154,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(strcmp(topic,msg)==0){
       actualizacionOTA();
     }
-  else
-  {
-    Serial.println("Error: Topic desconocido");
-  }
+    
 
   free(mensaje); // libero memoria
 }
@@ -195,6 +199,7 @@ void cambioIntensidadGradual(int valor, int vel){
     }
     client.publish("infind/GRUPO7/led/status",serializa_JSON_LED(valor).c_str()); //Se serializa la informacion y se envia por el topic de status
      valor_previo = valor;
+     valor_led_actual = valor;
      velocidad_anterior=velocidadCambio;
 }
 
@@ -207,16 +212,25 @@ void reconnect() {
     String clientId = "ESP8266Client-";
     clientId += String(ESP.getChipId()); // ID en base a la ID del propio CHIP del ESP, en lugar de aleatoria
 
-    char* willTopic = "infind/GRUPO7/conexion";
+    char willTopic[128];
+    snprintf(willTopic, 128, "infind/GRUPO7/ESP%d/conexion", ESPID);
     unsigned int QoS = 2;
+    //char* willTopic = "infind/GRUPO7/conexion";
     boolean willRetain = true;
-    char* willMessage = "Offline";
+    //char* willMessage = "Offline";
     boolean cleanSession = false;
     char* online = "Online";
+
+    conexion_datos.chipID = ESPID;
+    conexion_datos.online = false;
+    String willMessage = serializa_JSON_Conexion(conexion_datos);
     
     // Attempt to connect
-    if (client.connect(clientId.c_str(), "","", willTopic, QoS,willRetain, willMessage, cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
-      client.publish(willTopic, online, true);
+    if (client.connect(clientId.c_str(), "","", willTopic, QoS,willRetain, willMessage.c_str(), cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
+      conexion_datos.online = true;
+      String datos_conexion = serializa_JSON_Conexion(conexion_datos);
+      Serial.println(willTopic);
+      client.publish(willTopic, datos_conexion.c_str(),true);
       Serial.println("connected");
       client.subscribe("infind/GRUPO7/led/cmd");
       
@@ -253,6 +267,17 @@ String serializa_JSON_Datos (struct registro_datos datos)
   serializeJson(jsonRoot,jsonString);
   return jsonString;
 }
+
+String serializa_JSON_Conexion (struct registro_conexion conexion_datos){
+  StaticJsonDocument<300> jsonRoot;
+  String jsonString;
+
+  jsonRoot["ChipID"] = conexion_datos.chipID;
+  jsonRoot["Online"] = conexion_datos.online;
+
+  serializeJson(jsonRoot,jsonString);
+  return jsonString;
+  }
 
 String serializa_JSON_LED(int led){
   StaticJsonDocument<300> jsonRoot;
@@ -309,7 +334,7 @@ void progreso_OTA(int x, int todo)
 }
 
 void actualizacionOTA(){
-    Serial.println( "---------------------------" );  
+  Serial.println( "---------------------------" );  
   Serial.println( "Comprobando actualización:" );
   Serial.print(HTTP_OTA_ADDRESS);Serial.print(":");Serial.print(HTTP_OTA_PORT);Serial.println(HTTP_OTA_PATH);
   Serial.println( "--------------------------" );  
@@ -340,6 +365,28 @@ void longpress(Button2& btn) {
         
     }
 }
+void pressed(Button2& btn) {
+    Serial.println("pressed");
+    if(valor_led_actual > 0){
+      analogWrite(BUILTIN_LED,1023);
+      valor_led_anterior = valor_led_actual;
+      valor_led_actual = 0;
+      Serial.println("Lo apago");
+      Serial.println(valor_led_actual);
+     }else{
+      Serial.println("lo enciendo");
+      Serial.println(valor_led_anterior);
+      analogWrite(BUILTIN_LED,((100-valor_led_anterior)*1023/100));
+      valor_led_actual = valor_led_anterior;
+     }
+}
+void doubleClick(Button2& btn) {
+    Serial.println("double click\n");
+    Serial.println("lo enciendo");
+    Serial.println(valor_led_anterior);
+    analogWrite(BUILTIN_LED,((100-100)*1023/100));
+    valor_led_actual = 100;
+}
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   dht.setup(5, DHTesp::DHT11);
@@ -353,6 +400,8 @@ void setup() {
   
   //Se configura el boton flash con interrupcion para permitir actualizar cuando se pulse al menos 5 seg
   button.setLongClickHandler(longpress);
+  button.setPressedHandler(pressed);
+  button.setDoubleClickHandler(doubleClick);
 
 }
 
