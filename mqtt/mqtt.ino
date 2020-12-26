@@ -61,6 +61,11 @@ struct registro_conexion {
   bool online;
   } conexion_datos;
 
+struct registro_log{
+  String chipID;
+  String tipo;
+  String mensaje;
+  } log_datos;
 void setup_wifi() {
 
   delay(10);
@@ -96,9 +101,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-
+  snprintf(msg, 128, "infind/GRUPO7/ESP%d/led/cmd", ESPID);
   // compruebo que es el topic adecuado
-  if(strcmp(topic,"infind/GRUPO7/led/cmd")==0)
+  if(strcmp(topic,msg)==0)
   {
     StaticJsonDocument<512> root; // el tamaño tiene que ser adecuado para el mensaje
     // Deserialize the JSON document
@@ -230,9 +235,12 @@ void reconnect() {
       conexion_datos.online = true;
       String datos_conexion = serializa_JSON_Conexion(conexion_datos);
       Serial.println(willTopic);
-      client.publish(willTopic, datos_conexion.c_str(),true);
+      client.publish(willTopic, datos_conexion.c_str(),false);
       Serial.println("connected");
-      client.subscribe("infind/GRUPO7/led/cmd");
+      registrarEventoLog(ESPID, "Evento", "ESP Conectada al Sistema");
+      
+      snprintf(msg, 128, "infind/GRUPO7/ESP%d/led/cmd", ESPID);
+      client.subscribe(msg);
       
       snprintf(msg, 128, "infind/GRUPO7/ESP%d/FOTA", ESPID); // Suscripción a actualizaciones
       client.subscribe(msg);
@@ -274,6 +282,18 @@ String serializa_JSON_Conexion (struct registro_conexion conexion_datos){
 
   jsonRoot["ChipID"] = conexion_datos.chipID;
   jsonRoot["Online"] = conexion_datos.online;
+
+  serializeJson(jsonRoot,jsonString);
+  return jsonString;
+  }
+
+String serializa_JSON_Log (struct registro_log log_datos){
+  StaticJsonDocument<300> jsonRoot;
+  String jsonString;
+  
+  jsonRoot["ChipID"] = log_datos.chipID;
+  jsonRoot["Tipo"] = log_datos.tipo;
+  jsonRoot["Mensaje"] = log_datos.mensaje;
 
   serializeJson(jsonRoot,jsonString);
   return jsonString;
@@ -333,6 +353,17 @@ void progreso_OTA(int x, int todo)
   }
 }
 
+void registrarEventoLog(int espid, String tipo, String mensaje){
+  log_datos.chipID =  ESPID;
+  log_datos.tipo =  tipo;
+  log_datos.mensaje =  mensaje;
+
+  String json = serializa_JSON_Log(log_datos);
+
+  snprintf(msg, 128, "infind/GRUPO7/ESP%d/log", ESPID);
+  client.publish(msg, json.c_str());
+  }
+
 void actualizacionOTA(){
   Serial.println( "---------------------------" );  
   Serial.println( "Comprobando actualización:" );
@@ -361,6 +392,7 @@ void longpress(Button2& btn) {
     
     if (time > 5000) {
         Serial.print("Pulsación larga de 5 segundos: Se va a lanzar la actualización ");
+        registrarEventoLog(ESPID, "Evento", "Pulsación larga de 5 segundos: Se va a lanzar la actualización");
         actualizacionOTA();
         
     }
@@ -379,6 +411,7 @@ void pressed(Button2& btn) {
       analogWrite(BUILTIN_LED,((100-valor_led_anterior)*1023/100));
       valor_led_actual = valor_led_anterior;
      }
+     registrarEventoLog(ESPID, "Evento", "Se ha pulsado el Boton0");
 }
 void doubleClick(Button2& btn) {
     Serial.println("double click\n");
@@ -386,6 +419,7 @@ void doubleClick(Button2& btn) {
     Serial.println(valor_led_anterior);
     analogWrite(BUILTIN_LED,((100-100)*1023/100));
     valor_led_actual = 100;
+    registrarEventoLog(ESPID, "Evento", "Se ha pulsado dos veces el Boton0");
 }
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
@@ -418,7 +452,8 @@ void loop() {
       lastMsg = now;
       String datosJSON = publicarDatos();
       Serial.println(datosJSON.c_str());
-      client.publish("infind/GRUPO7/datos", datosJSON.c_str());
+      snprintf(msg, 128, "infind/GRUPO7/ESP%d/datos", ESPID);
+      client.publish(msg, datosJSON.c_str());
     }
   
   if(now - lastActu > tiempoEsperaActu){
