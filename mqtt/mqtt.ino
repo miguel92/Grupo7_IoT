@@ -66,6 +66,14 @@ struct registro_log{
   String tipo;
   String mensaje;
   } log_datos;
+  
+struct registro_switch_status{
+  String chipID;
+  String switch_estado;
+  String origen;
+  } switch_datos;
+
+
 void setup_wifi() {
 
   delay(10);
@@ -160,7 +168,54 @@ void callback(char* topic, byte* payload, unsigned int length) {
       actualizacionOTA();
     }
     
+  snprintf(msg, 128, "infind/GRUPO7/ESP%d/switch/cmd", ESPID);
 
+    // compruebo que es el topic adecuado
+  if(strcmp(topic,msg)==0)
+  {
+    StaticJsonDocument<512> root; // el tamaño tiene que ser adecuado para el mensaje
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(root, mensaje);
+
+    // Compruebo si no hubo error
+    if (error) {
+      Serial.print("Error deserializeJson() failed: ");
+      Serial.println(error.c_str());
+    }
+    else
+    if(root.containsKey("level"))  // comprobar si existe el campo/clave que estamos buscando
+    {
+      int valor = root["level"];
+
+      if(valor == 0){
+      analogWrite(BUILTIN_LED,1023);
+      valor_led_anterior = valor_led_actual;
+      valor_led_actual = 0;
+      Serial.println("Lo apago");
+      Serial.println(valor_led_actual);
+      switch_datos.switch_estado = "0";
+     }else{
+      Serial.println("lo enciendo");
+      Serial.println(valor_led_anterior);
+      analogWrite(BUILTIN_LED,0);
+      valor_led_actual = valor_led_anterior;
+      switch_datos.switch_estado = "1";
+     }
+     registrarEventoLog(ESPID, "Evento", "Se ha pulsado el Boton0 desde MQTT");
+    switch_datos.chipID = ESPID;
+    switch_datos.origen = "MQTT";
+     String json = serializa_JSON_Switch(switch_datos);
+
+      snprintf(msg, 128, "infind/GRUPO7/ESP%d/switch/status", ESPID);
+      client.publish(msg, json.c_str());
+    }
+    else
+    {
+       Serial.print("Error : ");
+       Serial.println(" \"level\" key was found in JSON");
+    }
+  } // if topic
+  
   free(mensaje); // libero memoria
 }
 
@@ -246,7 +301,10 @@ void reconnect() {
       
       snprintf(msg, 128, "infind/GRUPO7/ESP%d/FOTA", ESPID); // Suscripción a actualizaciones
       client.subscribe(msg);
-      
+
+      snprintf(msg, 128, "infind/GRUPO7/ESP%d/switch/cmd", ESPID);
+      client.subscribe(msg);
+
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -296,6 +354,18 @@ String serializa_JSON_Log (struct registro_log log_datos){
   jsonRoot["ChipID"] = log_datos.chipID;
   jsonRoot["Tipo"] = log_datos.tipo;
   jsonRoot["Mensaje"] = log_datos.mensaje;
+
+  serializeJson(jsonRoot,jsonString);
+  return jsonString;
+  }
+
+  String serializa_JSON_Switch (struct registro_switch_status switch_datos){
+  StaticJsonDocument<300> jsonRoot;
+  String jsonString;
+  
+  jsonRoot["ChipID"] = switch_datos.chipID;
+  jsonRoot["Switch"] = switch_datos.switch_estado;
+  jsonRoot["Origen"] = switch_datos.origen;
 
   serializeJson(jsonRoot,jsonString);
   return jsonString;
@@ -407,13 +477,21 @@ void pressed(Button2& btn) {
       valor_led_actual = 0;
       Serial.println("Lo apago");
       Serial.println(valor_led_actual);
+      switch_datos.switch_estado = "0";
      }else{
       Serial.println("lo enciendo");
       Serial.println(valor_led_anterior);
       analogWrite(BUILTIN_LED,((100-valor_led_anterior)*1023/100));
       valor_led_actual = valor_led_anterior;
+      switch_datos.switch_estado = "1";
      }
      registrarEventoLog(ESPID, "Evento", "Se ha pulsado el Boton0");
+
+     switch_datos.chipID = ESPID;
+     switch_datos.origen = "Placa";
+     String json = serializa_JSON_Switch(switch_datos);
+     snprintf(msg, 128, "infind/GRUPO7/ESP%d/switch/status", ESPID);
+     client.publish(msg, json.c_str());
 }
 void doubleClick(Button2& btn) {
     Serial.println("double click\n");
