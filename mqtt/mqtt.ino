@@ -11,7 +11,9 @@
 #include <ESP8266httpUpdate.h>
 #include "config.h"
 #include "Button2.h";
+#include <WiFiManager.h>
 #define BUTTON_PIN  0
+#include <EEPROM.h>
 // Update these with values suitable for your network.
 ADC_MODE(ADC_VCC);
 
@@ -31,10 +33,12 @@ volatile unsigned long ahora=0;
 volatile unsigned long ultima_int = 0;
 volatile boolean pulsado = false;
 unsigned int ESPID = ESP.getChipId();
+int numero=0; // Flag para controlar las config del WIFI
 
 //cambios de intensidad
 int valor_previo=-1;
 volatile int velocidad_anterior=-1;
+
 
 void progreso_OTA(int,int);
 void final_OTA();
@@ -42,6 +46,12 @@ void inicio_OTA();
 void error_OTA(int);
 
 Button2 button = Button2(BUTTON_PIN);
+
+// Creamos una instancia de la clase WiFiManager
+// Ampliacion
+WiFiManager wm; // global wm instance
+WiFiManagerParameter custom_field; // global param ( for non blocking w params )
+
 
 struct registro_datos { // Estructura de datos que recoge todas las lecturas necesarias para el topic de Datos
   float temperatura;
@@ -59,24 +69,97 @@ void setup_wifi() {
   delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  if (numero==0){
+    const char* custom_radio_str = "<br/><label for='customfieldid'>Custom Field Label</label><input type='radio' name='customfieldid' value='1' checked> One<br><input type='radio' name='customfieldid' value='2'> Two<br><input type='radio' name='customfieldid' value='3'> Three";
+    new (&custom_field) WiFiManagerParameter(custom_radio_str); // custom html input
+  
+    wm.addParameter(&custom_field);
+    wm.setSaveParamsCallback(saveParamCallback);
+  
+    std::vector<const char *> menu = {"wifi","info","param","sep","restart","exit"};
+    wm.setMenu(menu);
+  
+    // set dark theme
+    wm.setClass("invert");
+  
+  
+    // start portal w delay
+    Serial.println("Starting config portal");
+    wm.setConfigPortalTimeout(120);
+    
+    if (!wm.startConfigPortal("ConfiguracionWifiESP","password")) {
+      Serial.println("failed to connect or hit timeout");
+      delay(3000);
+      // ESP.restart();
+    } else {
+      //if you get here you have connected to the WiFi
+      Serial.println("connected...yeey :)");
+      EEPROM.write(0, 1);
+      EEPROM.commit();
+    }
+    
 
+  }else {
+  Serial.print("Connecting to ");
+  Serial.println(WiFi.SSID());
+  WiFi.begin(ssid, password); 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-
-  randomSeed(micros());
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  }
+  
 }
+
+void writeString(char add,String data)
+{
+  int _size = data.length();
+  int i;
+  for(i=0;i<_size;i++)
+  {
+    EEPROM.write(add+i,data[i]);
+  }
+  EEPROM.write(add+_size,'\0');   //Add termination null character for String Data
+  EEPROM.commit();
+}
+
+String read_String(char add)
+{
+  int i;
+  char data[100]; //Max 100 Bytes
+  int len=0;
+  unsigned char k;
+  k=EEPROM.read(add);
+  while(k != '\0' && len<500)   //Read until null character
+  {    
+    k=EEPROM.read(add+len);
+    data[len]=k;
+    len++;
+  }
+  data[len]='\0';
+  return String(data);
+}
+
+void saveParamCallback(){
+  Serial.println("[CALLBACK] saveParamCallback fired");
+  Serial.println("PARAM customfieldid = " + getParam("customfieldid"));
+}
+
+String getParam(String name){
+  //read parameter from server, for customhmtl input
+  String value;
+  if(wm.server->hasArg(name)) {
+    value = wm.server->arg(name);
+  }
+  return value;
+}
+
 
 void callback(char* topic, byte* payload, unsigned int length) {
    char *mensaje=(char* )malloc(length+1); // reservo memoria para copia del mensaje
@@ -344,6 +427,9 @@ void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   dht.setup(5, DHTesp::DHT11);
   Serial.begin(115200);
+  EEPROM.begin(512);
+  // Leemos el numero de la memoria
+  numero = EEPROM.read(0);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -354,7 +440,11 @@ void setup() {
   //Se configura el boton flash con interrupcion para permitir actualizar cuando se pulse al menos 5 seg
   button.setLongClickHandler(longpress);
 
+  //Configuracion para el wifi del boton flash (si se pulsa dos veces)
+  button.setTripleClickHandler(tripleClick);
+
 }
+
 
 void loop() {
   if (!client.connected()) {
@@ -376,4 +466,18 @@ void loop() {
     lastActu = now;
     actualizacionOTA();
   }
+}
+
+// Cuando se pulsa el boton flash dos veces
+void tripleClick(Button2& btn) {
+    // Flag a 0 borrar config
+    EEPROM.write(0, 0);
+    EEPROM.commit();
+    Serial.println("Reseteando configuración de WIFI......");
+    wm.resetSettings();
+    ESP.restart();
+    // start portal w delay
+    Serial.println("Starting config portal");
+    wm.setConfigPortalTimeout(120); 
+
 }
