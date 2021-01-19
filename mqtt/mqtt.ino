@@ -371,7 +371,7 @@ void reconnect() {
     String willMessage = serializa_JSON_Conexion(conexion_datos);
     
     // Attempt to connect
-    if (client.connect(clientId.c_str(), "","", willTopic, QoS,willRetain, willMessage.c_str(), cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
+    if (client.connect(clientId.c_str(), mqtt_user,mqtt_pass, willTopic, QoS,willRetain, willMessage.c_str(), cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
       conexion_datos.online = true;
       String datos_conexion = serializa_JSON_Conexion(conexion_datos);
       Serial.println(willTopic);
@@ -520,16 +520,25 @@ void registrarEventoLog(int espid, String tipo, String mensaje){
   }
 
 void actualizacionOTA(){
-  Serial.println( "---------------------------" );  
+  if(OTAfingerprint != ""){
+    Serial.println( "UMA Update" );
+    actualizacionOTAUMA();
+    }else{
+      Serial.println( "Local Update" );
+      actualizacionOTANOUMA();
+      }
+  }
+ void actualizacionOTAUMA(){
+    Serial.println( "--------------------------" );  
   Serial.println( "Comprobando actualización:" );
-  Serial.print(HTTP_OTA_ADDRESS);Serial.print(":");Serial.print(HTTP_OTA_PORT);Serial.println(HTTP_OTA_PATH);
+  Serial.print(OTA_URL);
   Serial.println( "--------------------------" );  
   ESPhttpUpdate.setLedPin(16,LOW);
   ESPhttpUpdate.onStart(inicio_OTA);
   ESPhttpUpdate.onError(error_OTA);
   ESPhttpUpdate.onProgress(progreso_OTA);
   ESPhttpUpdate.onEnd(final_OTA);
-  switch(ESPhttpUpdate.update(HTTP_OTA_ADDRESS, HTTP_OTA_PORT, HTTP_OTA_PATH, HTTP_OTA_VERSION)) {
+  switch(ESPhttpUpdate.update(OTA_URL, HTTP_OTA_VERSION, OTAfingerprint)) {
     case HTTP_UPDATE_FAILED:
       Serial.printf(" HTTP update failed: Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
       break;
@@ -541,7 +550,29 @@ void actualizacionOTA(){
       break;
     }
   }
+  void actualizacionOTANOUMA(){
+      Serial.println( "---------------------------" );  
+  Serial.println( "Comprobando actualización:" );
+  Serial.print(OTA_URL);
+  Serial.println( "--------------------------" );  
+  ESPhttpUpdate.setLedPin(16,LOW);
+  ESPhttpUpdate.onStart(inicio_OTA);
+  ESPhttpUpdate.onError(error_OTA);
+  ESPhttpUpdate.onProgress(progreso_OTA);
+  ESPhttpUpdate.onEnd(final_OTA);
   
+  switch(ESPhttpUpdate.update(HTTP_OTA_ADDRESS, HTTP_OTA_PORT, HTTP_OTA_PATH, HTTP_OTA_VERSION)) {
+    case HTTP_UPDATE_FAILED:
+      Serial.printf(" HTTP update failed: Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      break;
+    case HTTP_UPDATE_NO_UPDATES:
+      Serial.println(F(" El dispositivo ya está actualizado"));
+      break;
+    case HTTP_UPDATE_OK:
+      Serial.println(F(" OK"));
+      break;
+    }
+    }
 void longpress(Button2& btn) {
     unsigned int time = btn.wasPressedFor();
     
