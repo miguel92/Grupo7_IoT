@@ -371,7 +371,7 @@ void reconnect() {
     String willMessage = serializa_JSON_Conexion(conexion_datos);
     
     // Attempt to connect
-    if (client.connect(clientId.c_str(), "","", willTopic, QoS,willRetain, willMessage.c_str(), cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
+    if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass, willTopic, QoS,willRetain, willMessage.c_str(), cleanSession)) { // Aqui se configura el mensaje de ultimas voluntades, cuando la maquina se cierre de manera abrupta el broker tendra retenido este mensaje
       conexion_datos.online = true;
       String datos_conexion = serializa_JSON_Conexion(conexion_datos);
       Serial.println(willTopic);

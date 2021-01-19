@@ -1,0 +1,1840 @@
+[
+    {
+        "id": "2e3bde7.b715222",
+        "type": "tab",
+        "label": "Flow 5",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "542750f9.3c09",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/+/datos",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 159.20001220703125,
+        "y": 139.1999969482422,
+        "wires": [
+            [
+                "c6650264.f49a7"
+            ]
+        ]
+    },
+    {
+        "id": "19c88942.a4b2e7",
+        "type": "mqtt out",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "broker": "b465132d.b97f8",
+        "x": 1173.199951171875,
+        "y": 773.2000122070312,
+        "wires": []
+    },
+    {
+        "id": "a01399dc.58b988",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/led/status",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 150,
+        "y": 920,
+        "wires": [
+            [
+                "6031b3b4.75ce1c"
+            ]
+        ]
+    },
+    {
+        "id": "6031b3b4.75ce1c",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 410,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "54a5bd29.bb48d4",
+        "type": "ui_gauge",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "group": "139ab74f.2282c9",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperatura",
+        "label": "ºC",
+        "format": "{{payload.DHT11.temp}}",
+        "min": "-10",
+        "max": "45",
+        "colors": [
+            "#0033ff",
+            "#22fc03",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 837.2000122070312,
+        "y": 30.199996948242188,
+        "wires": []
+    },
+    {
+        "id": "69c6dabb.3bd614",
+        "type": "ui_gauge",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "group": "139ab74f.2282c9",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "wave",
+        "title": "Humedad",
+        "label": "%",
+        "format": "{{payload.DHT11.hum}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#8ddbf1",
+            "#264ad9",
+            "#011bfe"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 837.2000122070312,
+        "y": 79.19999694824219,
+        "wires": []
+    },
+    {
+        "id": "9dba1542.151ed8",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Recuperación de datos",
+        "info": "",
+        "x": 170.49998474121094,
+        "y": 57.59999084472656,
+        "wires": []
+    },
+    {
+        "id": "1654adc5.39db92",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 605.2000122070312,
+        "y": 130.1999969482422,
+        "wires": [
+            [
+                "54a5bd29.bb48d4",
+                "69c6dabb.3bd614",
+                "22d30153.59253e",
+                "6b3b4160.6114b",
+                "fad74ffb.e2a64",
+                "42acb73c.9bc678",
+                "3d4d4bbc.283e54",
+                "c4df1725.ae6548",
+                "2420e906.9e9c36"
+            ]
+        ]
+    },
+    {
+        "id": "22d30153.59253e",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Split",
+        "func": "var msg1 = {};\nvar msg2 = {};\n\nmsg1.payload=msg.payload.DHT11.temp;\nmsg1.topic = \"Temperatura\";\nmsg2.payload=msg.payload.DHT11.hum;\nmsg2.topic=\"Humedad\";\nreturn [msg1,msg2];",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 774,
+        "y": 144.99998474121094,
+        "wires": [
+            [
+                "e60e05a5.2d58e8"
+            ],
+            [
+                "e60e05a5.2d58e8"
+            ]
+        ]
+    },
+    {
+        "id": "e60e05a5.2d58e8",
+        "type": "ui_chart",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "group": "d2943d49.d9485",
+        "order": 0,
+        "width": "0",
+        "height": "0",
+        "label": "Temperatura-Humedad",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1014,
+        "y": 144.99998474121094,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "6b3b4160.6114b",
+        "type": "template",
+        "z": "2e3bde7.b715222",
+        "name": "lista en formato html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": " <h3>Datos de Wifi: </h3>\n ",
+        "output": "str",
+        "x": 843,
+        "y": 221.99998474121094,
+        "wires": [
+            [
+                "b478a072.e6cb7"
+            ]
+        ]
+    },
+    {
+        "id": "b478a072.e6cb7",
+        "type": "ui_template",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "name": "Datos de Wifi",
+        "order": 1,
+        "width": "6",
+        "height": "1",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1060,
+        "y": 223.99998474121094,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "42acb73c.9bc678",
+        "type": "template",
+        "z": "2e3bde7.b715222",
+        "name": "Titulo html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": " <h3>ESP8266: </h3>\n",
+        "output": "str",
+        "x": 774,
+        "y": 288,
+        "wires": [
+            [
+                "72467730.5684a8"
+            ]
+        ]
+    },
+    {
+        "id": "2ea82db1.c9dad2",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Slider para intensidad de LED",
+        "info": "",
+        "x": 168,
+        "y": 581,
+        "wires": []
+    },
+    {
+        "id": "a189719b.7a30c",
+        "type": "ui_slider",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Limite Intensidad (%)",
+        "tooltip": "",
+        "group": "6514fc70.27fcd4",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "infind/GRUPO7/led/cmd",
+        "min": "0",
+        "max": "100",
+        "step": "1",
+        "x": 168,
+        "y": 702,
+        "wires": [
+            [
+                "73f38dfa.313944",
+                "74ca7f4d.ed099"
+            ]
+        ]
+    },
+    {
+        "id": "73f38dfa.313944",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Convertir valor a JSON (level)",
+        "func": "\nmsg.payload = {\"level\": msg.payload};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 457,
+        "y": 703,
+        "wires": [
+            [
+                "41425b48.6e15c4"
+            ]
+        ]
+    },
+    {
+        "id": "74ca7f4d.ed099",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "6514fc70.27fcd4",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Intensidad de luz",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "x": 420,
+        "y": 643,
+        "wires": []
+    },
+    {
+        "id": "fad74ffb.e2a64",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Conversión mV a V y mS a S",
+        "func": "\nmsg.payload.Uptime = Math.trunc(msg.payload.Uptime/1000);\nmsg.payload.Voltaje = msg.payload.Voltaje/1000;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 660,
+        "y": 484,
+        "wires": [
+            [
+                "4f3ab16.d8c575",
+                "3125f39e.d1aacc",
+                "d48793c2.cf1bc"
+            ]
+        ]
+    },
+    {
+        "id": "4f3ab16.d8c575",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Tiempo online:",
+        "format": "{{msg.payload.Uptime}} segundos",
+        "layout": "row-spread",
+        "x": 964.5,
+        "y": 468.79998779296875,
+        "wires": []
+    },
+    {
+        "id": "3125f39e.d1aacc",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Voltaje",
+        "format": "{{msg.payload.Voltaje}} voltios",
+        "layout": "row-spread",
+        "x": 967.5,
+        "y": 516.7999877929688,
+        "wires": []
+    },
+    {
+        "id": "d48793c2.cf1bc",
+        "type": "ui_gauge",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "group": "80466083.10ce",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Voltaje",
+        "label": "Vcc",
+        "format": "{{payload.Voltaje}}",
+        "min": "0",
+        "max": "3.3",
+        "colors": [
+            "#0033ff",
+            "#22fc03",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 964.2000122070312,
+        "y": 563.2000122070312,
+        "wires": []
+    },
+    {
+        "id": "72467730.5684a8",
+        "type": "ui_template",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "name": "Titulo ESP8266",
+        "order": 5,
+        "width": "6",
+        "height": "1",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1023.2000122070312,
+        "y": 289.20001220703125,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2420e906.9e9c36",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "SSID",
+        "format": "{{msg.payload.Wifi.SSID}}",
+        "layout": "row-spread",
+        "x": 753.5,
+        "y": 338.79998779296875,
+        "wires": []
+    },
+    {
+        "id": "c4df1725.ae6548",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "IP Local",
+        "format": "{{msg.payload.Wifi.IP}}",
+        "layout": "row-spread",
+        "x": 759.5,
+        "y": 387.79998779296875,
+        "wires": []
+    },
+    {
+        "id": "3d4d4bbc.283e54",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "80466083.10ce",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "RSS",
+        "format": "{{msg.payload.Wifi.RSSI}}",
+        "layout": "row-spread",
+        "x": 742.5,
+        "y": 435.79998779296875,
+        "wires": []
+    },
+    {
+        "id": "94bf38da.c571c8",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Último mensaje recibido",
+        "info": "",
+        "x": 140,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "f136b2b1.97f36",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "6514fc70.27fcd4",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Último dato recibido",
+        "format": "{{msg.payload.Hora}}",
+        "layout": "col-center",
+        "x": 1120,
+        "y": 1000,
+        "wires": []
+    },
+    {
+        "id": "a82d079b.a15108",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Hora",
+        "func": "var d = new Date();\nvar mes = d.getMonth()+1;\nvar time = d.getHours() + \":\" + d.getMinutes() + \":\" + d.getSeconds() + \" \" + \"(\" + d.getUTCDate() + \"/\" + mes + \"/\" + d.getFullYear() + \")\";\nmsg.payload.Hora = time;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 910,
+        "y": 1000,
+        "wires": [
+            [
+                "f136b2b1.97f36"
+            ]
+        ]
+    },
+    {
+        "id": "4496303b.d6bd3",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/+/datos",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 140,
+        "y": 1000,
+        "wires": [
+            [
+                "9265c6e3.1ad158",
+                "43cf6d3a.eb6774"
+            ]
+        ]
+    },
+    {
+        "id": "dc802a60.9a56e8",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 770,
+        "y": 1000,
+        "wires": [
+            [
+                "a82d079b.a15108"
+            ]
+        ]
+    },
+    {
+        "id": "fc2b48c8.7e1208",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/+/conexion",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 174.1999969482422,
+        "y": 1253.1998901367188,
+        "wires": [
+            [
+                "b8f8921a.e33f",
+                "6988d9f2.aca9b8",
+                "cb99f8be.d199a8"
+            ]
+        ]
+    },
+    {
+        "id": "b46de58.d012418",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Estado del dispositivo",
+        "info": "",
+        "x": 155.1999969482422,
+        "y": 1180.1998901367188,
+        "wires": []
+    },
+    {
+        "id": "ea27ce3a.aa1e5",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "6514fc70.27fcd4",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Estado del dispositivo",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 1289.5,
+        "y": 1205.7999267578125,
+        "wires": []
+    },
+    {
+        "id": "5d9baf7a.98038",
+        "type": "ui_led",
+        "z": "2e3bde7.b715222",
+        "group": "6514fc70.27fcd4",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "label": "Estado ",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "green",
+                "value": "Encendida",
+                "valueType": "str"
+            },
+            {
+                "color": "red",
+                "value": "Apagada",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "name": "Color LED",
+        "x": 1263.199951171875,
+        "y": 1269.199951171875,
+        "wires": []
+    },
+    {
+        "id": "1a8016d.26cfbe9",
+        "type": "ui_slider",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Limite velocidad (% / 10ms)",
+        "tooltip": "",
+        "group": "6514fc70.27fcd4",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "infind/GRUPO7/led/cmd",
+        "min": "1",
+        "max": "5",
+        "step": "1",
+        "x": 180,
+        "y": 831,
+        "wires": [
+            [
+                "bb64ce89.8aaa2",
+                "d5352b20.a7ab58"
+            ]
+        ]
+    },
+    {
+        "id": "fe6fb744.b9fed8",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Slider para velocidad de cambio de Intensidad de LED",
+        "info": "",
+        "x": 246,
+        "y": 767,
+        "wires": []
+    },
+    {
+        "id": "bb64ce89.8aaa2",
+        "type": "ui_text",
+        "z": "2e3bde7.b715222",
+        "group": "6514fc70.27fcd4",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Velocidad de cambio",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "x": 464,
+        "y": 808,
+        "wires": []
+    },
+    {
+        "id": "d5352b20.a7ab58",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Convertir valor a JSON (speed)",
+        "func": "\nmsg.payload = {\"speed\": msg.payload};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 479,
+        "y": 853,
+        "wires": [
+            [
+                "41425b48.6e15c4"
+            ]
+        ]
+    },
+    {
+        "id": "88692dcc.e995c",
+        "type": "mqtt out",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "broker": "b465132d.b97f8",
+        "x": 602,
+        "y": 1515,
+        "wires": []
+    },
+    {
+        "id": "9de76955.cdc338",
+        "type": "ui_button",
+        "z": "2e3bde7.b715222",
+        "name": "Actualizar",
+        "group": "6514fc70.27fcd4",
+        "order": 8,
+        "width": "0",
+        "height": "0",
+        "passthru": false,
+        "label": "Actualizar Dispositivo",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "json",
+        "topic": "",
+        "x": 125,
+        "y": 1511,
+        "wires": [
+            [
+                "e4529cd6.a0ac7",
+                "60638167.2887"
+            ]
+        ]
+    },
+    {
+        "id": "e4529cd6.a0ac7",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 605,
+        "y": 1656,
+        "wires": []
+    },
+    {
+        "id": "6b63e826.40de98",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 1225.8333740234375,
+        "y": 2193,
+        "wires": []
+    },
+    {
+        "id": "fea48ce3.2cda9",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "Insertar ESP en la Lista",
+        "collection": "lista_esp",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "store",
+        "x": 537.772705078125,
+        "y": 1852.7669677734375,
+        "wires": []
+    },
+    {
+        "id": "6a73a7ff.fea018",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Insertar la ESP en la base de datos",
+        "info": "sólo el payload\nantes le añadimos la fecha",
+        "x": 165.99998474121094,
+        "y": 1782.0000190734863,
+        "wires": []
+    },
+    {
+        "id": "cb99f8be.d199a8",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 782.5,
+        "y": 1240,
+        "wires": [
+            [
+                "30ab0123.51723e"
+            ]
+        ]
+    },
+    {
+        "id": "30ab0123.51723e",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Extraer el estado Online",
+        "func": "if(msg.payload.Online){\n    msg.payload = \"Encendida\";\n}else{\n    msg.payload = \"Apagada\";\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1003.5,
+        "y": 1246,
+        "wires": [
+            [
+                "5d9baf7a.98038",
+                "ea27ce3a.aa1e5"
+            ]
+        ]
+    },
+    {
+        "id": "78ee7108.40fba",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Datos Conexion",
+        "links": [
+            "b48be7f9.e8dbd8"
+        ],
+        "x": 803.5,
+        "y": 1319,
+        "wires": []
+    },
+    {
+        "id": "b48be7f9.e8dbd8",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "links": [
+            "78ee7108.40fba"
+        ],
+        "x": 165.5,
+        "y": 1853,
+        "wires": [
+            [
+                "63e9eeba.565ef",
+                "6b9955ef.90483c"
+            ]
+        ]
+    },
+    {
+        "id": "8bbf3290.29c5a",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "Borrado de la ESP de la lista",
+        "collection": "lista_esp",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "delete",
+        "x": 791,
+        "y": 1942,
+        "wires": []
+    },
+    {
+        "id": "63e9eeba.565ef",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload.Online",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 283.5,
+        "y": 1854,
+        "wires": [
+            [
+                "fea48ce3.2cda9"
+            ],
+            [
+                "35b449c.45848b6",
+                "31f9bc86.96eb44"
+            ]
+        ]
+    },
+    {
+        "id": "b982b2a3.eeb29",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "lista_esp",
+        "operation": "find",
+        "x": 442.00006103515625,
+        "y": 2137,
+        "wires": [
+            [
+                "441f96d9.55f448"
+            ]
+        ]
+    },
+    {
+        "id": "256659fe.f56b96",
+        "type": "inject",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "",
+        "payload": "{ }",
+        "payloadType": "json",
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 119,
+        "y": 2163.3665771484375,
+        "wires": [
+            [
+                "b982b2a3.eeb29"
+            ]
+        ]
+    },
+    {
+        "id": "6b9955ef.90483c",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 249.5,
+        "y": 1936,
+        "wires": []
+    },
+    {
+        "id": "35b449c.45848b6",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Query para Borrar la ESP",
+        "func": "msg.payload = {\"ChipID\": msg.payload.ChipID};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 521.5,
+        "y": 1942,
+        "wires": [
+            [
+                "8bbf3290.29c5a"
+            ]
+        ]
+    },
+    {
+        "id": "b6ed97bc.a877b8",
+        "type": "ui_dropdown",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "place": "Selecciona una ESP",
+        "group": "80466083.10ce",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "options": [
+            {
+                "label": "Todas",
+                "value": "Todas",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "",
+        "x": 1009.5,
+        "y": 2139,
+        "wires": [
+            [
+                "8a99aebc.cdfc7",
+                "6b63e826.40de98"
+            ]
+        ],
+        "outputLabels": [
+            "oye"
+        ]
+    },
+    {
+        "id": "b8f8921a.e33f",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Conexion Handler",
+        "links": [
+            "90aa193d.ed8d58"
+        ],
+        "x": 364.5,
+        "y": 1368,
+        "wires": []
+    },
+    {
+        "id": "90aa193d.ed8d58",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "links": [
+            "b8f8921a.e33f"
+        ],
+        "x": 76.5,
+        "y": 2082,
+        "wires": [
+            [
+                "7ea1a960.d14b18"
+            ]
+        ]
+    },
+    {
+        "id": "441f96d9.55f448",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Convertir datos a .options ",
+        "func": "var longitud = msg.payload.length;\nmsg.options = [];\nvar listaGlobal = [];\n\nif(longitud >0){\n    msg.options[0] = \"Todas\";\n    for(var i = 0; i < longitud; i++){\n        msg.options[i+1] = msg.payload[i].ChipID;\n        //new mod\n        listaGlobal.push(msg.payload[i].ChipID);\n    }\n    if(global.get(\"ESP\") !== 0){\n      msg.payload = global.get(\"ESP\");\n    }else{\n      msg.payload = msg.payload[0].ChipID;\n      global.set(\"ESP\",msg.payload);\n      \n    }\n    //new mod\n    global.set(\"listaGlobal\", listaGlobal);\n}else{\n    msg.options[0] = \"No hay ESPs\";\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 776.5,
+        "y": 2137,
+        "wires": [
+            [
+                "b6ed97bc.a877b8"
+            ]
+        ]
+    },
+    {
+        "id": "8a99aebc.cdfc7",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Setear Global",
+        "func": "global.set(\"ESP\",msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1228.5,
+        "y": 2141,
+        "wires": [
+            [
+                "1f9ce3b2.c1da7c"
+            ]
+        ]
+    },
+    {
+        "id": "7ea1a960.d14b18",
+        "type": "delay",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 178.5,
+        "y": 2109,
+        "wires": [
+            [
+                "b982b2a3.eeb29"
+            ]
+        ]
+    },
+    {
+        "id": "c6650264.f49a7",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Extraer ESP del Topic",
+        "func": "global.set(\"ESP_Actual\",msg.topic.split(\"/\")[2].substr(3));\nif(global.get(\"ESP_Actual\") != global.get(\"ESP\")){\n    global.set(\"ESP_Iguales\",false);\n}else{\n    global.set(\"ESP_Iguales\",true);\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 396,
+        "y": 137,
+        "wires": [
+            [
+                "38e44b01.089454"
+            ]
+        ]
+    },
+    {
+        "id": "38e44b01.089454",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "ESP_Iguales",
+        "propertyType": "global",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 508.5,
+        "y": 231,
+        "wires": [
+            [
+                "1654adc5.39db92"
+            ]
+        ]
+    },
+    {
+        "id": "e6af3630.7550f8",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Extraer ESP del Topic",
+        "func": "global.set(\"ESP_Actual\",msg.topic.split(\"/\")[2].substr(3));\nmsg.payload = global.get(\"ESP_Actual\");\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 2328,
+        "wires": [
+            [
+                "8e97f8c4.da5e18"
+            ]
+        ]
+    },
+    {
+        "id": "a0cc3a9.85963c8",
+        "type": "inject",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/ESP418957/datos",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 111,
+        "y": 2329,
+        "wires": [
+            [
+                "e6af3630.7550f8"
+            ]
+        ]
+    },
+    {
+        "id": "8e97f8c4.da5e18",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 653,
+        "y": 2329,
+        "wires": []
+    },
+    {
+        "id": "93c36c2f.1c66e",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Zona Testeo",
+        "info": "sólo el payload\nantes le añadimos la fecha",
+        "x": 119,
+        "y": 2257,
+        "wires": []
+    },
+    {
+        "id": "70f040db.d8c53",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "ESP_Iguales",
+        "propertyType": "global",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 610,
+        "y": 1000,
+        "wires": [
+            [
+                "dc802a60.9a56e8"
+            ]
+        ]
+    },
+    {
+        "id": "9265c6e3.1ad158",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Extraer ESP del Topic",
+        "func": "global.set(\"ESP_Actual\",msg.topic.split(\"/\")[2].substr(3));\nif(global.get(\"ESP_Actual\") != global.get(\"ESP\")){\n    global.set(\"ESP_Iguales\",false);\n}else{\n    global.set(\"ESP_Iguales\",true);\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 400,
+        "y": 1000,
+        "wires": [
+            [
+                "70f040db.d8c53"
+            ]
+        ]
+    },
+    {
+        "id": "41425b48.6e15c4",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "if (global.get(\"ESP\") == \"Todas\"){\n    listaG = global.get(\"listaGlobal\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/led/cmd\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/led/cmd\";\n    msg.topic = topic;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 904.5,
+        "y": 773,
+        "wires": [
+            [
+                "19c88942.a4b2e7",
+                "f0e009a3.92a608"
+            ]
+        ]
+    },
+    {
+        "id": "60638167.2887",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "if (global.get(\"ESP_Actual\") == \"Todas\"){\n    var topic = \"infind/GRUPO7/+/FOTA\";\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/FOTA\";\n}\nmsg.topic = topic;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 381,
+        "y": 1515,
+        "wires": [
+            [
+                "88692dcc.e995c"
+            ]
+        ]
+    },
+    {
+        "id": "f0e009a3.92a608",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "topic",
+        "x": 1115.5,
+        "y": 871,
+        "wires": []
+    },
+    {
+        "id": "6988d9f2.aca9b8",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 667,
+        "y": 1320,
+        "wires": [
+            [
+                "78ee7108.40fba"
+            ]
+        ]
+    },
+    {
+        "id": "aee4e26f.6a184",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Dropdown de ESP's",
+        "info": "sólo el payload\nantes le añadimos la fecha",
+        "x": 123,
+        "y": 2019,
+        "wires": []
+    },
+    {
+        "id": "1f9ce3b2.c1da7c",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Estado Led",
+        "links": [],
+        "x": 1363.5,
+        "y": 2094,
+        "wires": []
+    },
+    {
+        "id": "e52997f.472d968",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Guardar Logs",
+        "info": "sólo el payload\nantes le añadimos la fecha",
+        "x": 124,
+        "y": 2438,
+        "wires": []
+    },
+    {
+        "id": "25819069.7a42f",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/+/log",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 129,
+        "y": 2520,
+        "wires": [
+            [
+                "acc83870.48e0f8",
+                "e1941446.74bb08"
+            ]
+        ]
+    },
+    {
+        "id": "beb3312b.01a88",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "Guardar Log del sistema",
+        "collection": "log",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "store",
+        "x": 1030,
+        "y": 2520,
+        "wires": []
+    },
+    {
+        "id": "acc83870.48e0f8",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 365,
+        "y": 2520,
+        "wires": [
+            [
+                "6e776af8.aa5de4"
+            ]
+        ]
+    },
+    {
+        "id": "6e776af8.aa5de4",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "+ fecha",
+        "func": "msg.payload.date = new Date();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 533,
+        "y": 2519,
+        "wires": [
+            [
+                "9a1043ce.5b098"
+            ]
+        ]
+    },
+    {
+        "id": "e1941446.74bb08",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 424.5,
+        "y": 2590,
+        "wires": []
+    },
+    {
+        "id": "19a96b2d.7afb45",
+        "type": "inject",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "",
+        "payload": "{ }",
+        "payloadType": "json",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 109,
+        "y": 2687,
+        "wires": [
+            [
+                "518f8754.1378b8"
+            ]
+        ]
+    },
+    {
+        "id": "518f8754.1378b8",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "c55fe440.54b448",
+        "name": "",
+        "collection": "log",
+        "operation": "find",
+        "x": 454.00006103515625,
+        "y": 2691.633544921875,
+        "wires": [
+            [
+                "229270d6.46dee"
+            ]
+        ]
+    },
+    {
+        "id": "229270d6.46dee",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 787,
+        "y": 2689,
+        "wires": []
+    },
+    {
+        "id": "31f9bc86.96eb44",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Registro Offline",
+        "links": [
+            "1c04021f.c38bde"
+        ],
+        "x": 462.5,
+        "y": 2029,
+        "wires": []
+    },
+    {
+        "id": "1c04021f.c38bde",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "links": [
+            "31f9bc86.96eb44"
+        ],
+        "x": 101.5,
+        "y": 2861,
+        "wires": [
+            [
+                "dc08c5e4.0ed238"
+            ]
+        ]
+    },
+    {
+        "id": "dc08c5e4.0ed238",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Formatear Mensaje Desconexion",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"ESP desconectada de manera prematura\"};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 408.5,
+        "y": 2864,
+        "wires": [
+            [
+                "cff52620.230e78"
+            ]
+        ]
+    },
+    {
+        "id": "cff52620.230e78",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "+ fecha",
+        "func": "msg.payload.date = new Date();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 2863,
+        "wires": [
+            [
+                "9a1043ce.5b098"
+            ]
+        ]
+    },
+    {
+        "id": "61e4aee4.d0a4f",
+        "type": "mqtt in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "infind/GRUPO7/+/switch/status",
+        "qos": "2",
+        "broker": "b465132d.b97f8",
+        "x": 180.5,
+        "y": 3012,
+        "wires": [
+            [
+                "2217f964.f03ab6"
+            ]
+        ]
+    },
+    {
+        "id": "5c49b5e5.548a5c",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 856,
+        "y": 3010,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cc572de4.27f91",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "ESP_Iguales",
+        "propertyType": "global",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 677.2999877929688,
+        "y": 3018.7999877929688,
+        "wires": [
+            [
+                "5c49b5e5.548a5c"
+            ]
+        ]
+    },
+    {
+        "id": "2217f964.f03ab6",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Extraer ESP del Topic",
+        "func": "global.set(\"ESP_Actual\",msg.topic.split(\"/\")[2].substr(3));\nif(global.get(\"ESP_Actual\") != global.get(\"ESP\")){\n    global.set(\"ESP_Iguales\",false);\n}else{\n    global.set(\"ESP_Iguales\",true);\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 473.79998779296875,
+        "y": 3011.7999877929688,
+        "wires": [
+            [
+                "cc572de4.27f91"
+            ]
+        ]
+    },
+    {
+        "id": "f73b3632.ffeff8",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 659.5,
+        "y": 3205,
+        "wires": []
+    },
+    {
+        "id": "86e100a8.1469b",
+        "type": "mqtt out",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "broker": "b465132d.b97f8",
+        "x": 585,
+        "y": 3101,
+        "wires": []
+    },
+    {
+        "id": "eb808ff.b55537",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "if (global.get(\"ESP_Actual\") == \"Todas\"){\n    var topic = \"infind/GRUPO7/+/switch/cmd\";\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/switch/cmd\";\n}\nmsg.topic = topic;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 364,
+        "y": 3101,
+        "wires": [
+            [
+                "86e100a8.1469b",
+                "f73b3632.ffeff8"
+            ]
+        ]
+    },
+    {
+        "id": "88bf302.9cf2ed",
+        "type": "ui_switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Switch LED",
+        "tooltip": "",
+        "group": "6514fc70.27fcd4",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "",
+        "style": "",
+        "onvalue": "{\"level\":\"1\"}",
+        "onvalueType": "json",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "{\"level\":\"0\"}",
+        "offvalueType": "str",
+        "officon": "",
+        "offcolor": "",
+        "x": 129.5,
+        "y": 3169,
+        "wires": [
+            [
+                "eb808ff.b55537"
+            ]
+        ]
+    },
+    {
+        "id": "9a1043ce.5b098",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 800,
+        "y": 2520,
+        "wires": [
+            [
+                "beb3312b.01a88",
+                "9067e6eb.72f818"
+            ]
+        ]
+    },
+    {
+        "id": "9067e6eb.72f818",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Log Entrada",
+        "links": [
+            "d04437cc.53cb08"
+        ],
+        "x": 955,
+        "y": 2600,
+        "wires": []
+    },
+    {
+        "id": "59ddd5a4.ff5f4c",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Hora y ChipID",
+        "func": "var d = new Date();\nvar mes = d.getMonth()+1;\nvar time = d.getHours() + \":\" + d.getMinutes() + \":\" + d.getSeconds() + \" \" + \"(\" + d.getUTCDate() + \"/\" + mes + \"/\" + d.getFullYear() + \")\";\nmsg.payload.hora = time;\nmsg.payload.date = d;\nmsg.payload.ChipID = msg.topic.split(\"/\")[2].substr(3);\nreturn msg.payload;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 560,
+        "y": 1120,
+        "wires": [
+            [
+                "7d90727b.68f58c",
+                "1b0e8cc2.861573"
+            ]
+        ]
+    },
+    {
+        "id": "43cf6d3a.eb6774",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 350,
+        "y": 1120,
+        "wires": [
+            [
+                "59ddd5a4.ff5f4c"
+            ]
+        ]
+    },
+    {
+        "id": "7d90727b.68f58c",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "Guardar datos sensores",
+        "collection": "DatosESP",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "store",
+        "x": 850,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "7d619edb.a02f4",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Guardar últimos valores recibidos",
+        "info": "",
+        "x": 430,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "1b0e8cc2.861573",
+        "type": "debug",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 810,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "b465132d.b97f8",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "",
+        "broker": "iot.ac.uma.es",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "139ab74f.2282c9",
+        "type": "ui_group",
+        "z": "",
+        "name": "Datos",
+        "tab": "ed30b89b.0ab088",
+        "order": 1,
+        "disp": true,
+        "width": "7",
+        "collapse": false
+    },
+    {
+        "id": "d2943d49.d9485",
+        "type": "ui_group",
+        "z": "",
+        "name": "Gráfica (Temperatura, Humedad)",
+        "tab": "ed30b89b.0ab088",
+        "order": 2,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "80466083.10ce",
+        "type": "ui_group",
+        "z": "",
+        "name": "Datos WIFI y ESP8266",
+        "tab": "ed30b89b.0ab088",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "6514fc70.27fcd4",
+        "type": "ui_group",
+        "z": "",
+        "name": "Control LED",
+        "tab": "ed30b89b.0ab088",
+        "order": 4,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "bae6b600.bd35e8",
+        "type": "mongodb",
+        "z": "",
+        "hostname": "iot.ac.uma.es",
+        "port": "27017",
+        "db": "IOT7",
+        "name": "Conexion a UMA MongoDB Grupo7"
+    },
+    {
+        "id": "c55fe440.54b448",
+        "type": "mongodb",
+        "z": "",
+        "hostname": "iot.ac.uma.es",
+        "port": "27017",
+        "db": "IOT7",
+        "name": "Conexion a UMA MongoDB Grupo7"
+    },
+    {
+        "id": "ed30b89b.0ab088",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Tarea en grupo",
+        "icon": "dashboard",
+        "order": 7,
+        "disabled": false,
+        "hidden": false
+    }
+]
