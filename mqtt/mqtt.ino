@@ -14,6 +14,7 @@
 #include <WiFiManager.h>
 #define BUTTON_PIN  0
 #include <EEPROM.h>
+#include <math.h>
 // Update these with values suitable for your network.
 ADC_MODE(ADC_VCC);
 
@@ -466,7 +467,13 @@ String serializa_JSON_LED(int led){
   return jsonString;
   }
 
-
+void comprobarSensor(float humedad, float temperatura){
+  int checkHumedad = isnan((double)humedad);
+  int checkTemp = isnan((double)temperatura);
+    if(checkHumedad ==1 || checkTemp==1){
+        registrarEventoLog(ESPID, "Error", "El sensor de la ESP no esta generando valores, REVISAR cuanto antes.");
+      }
+  }
 String publicarDatos(){ // Esta funcion recoge todas las lecturas y los datos necesarios de conexion, los serializa y devuelve un String
   datos.humedad = dht.getHumidity();
   datos.temperatura = dht.getTemperature();
@@ -477,8 +484,9 @@ String publicarDatos(){ // Esta funcion recoge todas las lecturas y los datos ne
   datos.ip = WiFi.localIP().toString();
   datos.rssi = WiFi.RSSI();
 
+  comprobarSensor(datos.humedad,datos.temperatura);
   String json = serializa_JSON_Datos(datos);
-
+  
 
   return json;
 }
