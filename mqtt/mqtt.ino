@@ -238,6 +238,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       else{
        Serial.print("Error : ");
        Serial.println("Neither \"level\" nor \"speed\" key was found in JSON");
+       registrarEventoLog(ESPID, "Error", "Mensaje recibido en el topic led/cmd no tiene la estructura correcta");
       }
 
       
@@ -296,6 +297,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     {
        Serial.print("Error : ");
        Serial.println(" \"level\" key was found in JSON");
+       registrarEventoLog(ESPID, "Error", "Mensaje recibido en el topic switch/cmd no tiene la estructura correcta");
     }
   } // if topic
   
