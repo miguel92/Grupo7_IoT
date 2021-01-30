@@ -18,7 +18,8 @@
         "y": 139.1999969482422,
         "wires": [
             [
-                "c6650264.f49a7"
+                "c6650264.f49a7",
+                "f23a91ea.7d989"
             ]
         ]
     },
@@ -71,7 +72,7 @@
         "z": "2e3bde7.b715222",
         "name": "",
         "group": "139ab74f.2282c9",
-        "order": 2,
+        "order": 1,
         "width": 0,
         "height": 0,
         "gtype": "gage",
@@ -176,7 +177,7 @@
         "z": "2e3bde7.b715222",
         "name": "",
         "group": "d2943d49.d9485",
-        "order": 0,
+        "order": 1,
         "width": "0",
         "height": "0",
         "label": "Temperatura-Humedad",
@@ -751,20 +752,6 @@
         "wires": []
     },
     {
-        "id": "6b63e826.40de98",
-        "type": "debug",
-        "z": "2e3bde7.b715222",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "x": 1225.8333740234375,
-        "y": 2193,
-        "wires": []
-    },
-    {
         "id": "fea48ce3.2cda9",
         "type": "mongodb out",
         "z": "2e3bde7.b715222",
@@ -988,8 +975,7 @@
         "y": 2139,
         "wires": [
             [
-                "8a99aebc.cdfc7",
-                "6b63e826.40de98"
+                "8a99aebc.cdfc7"
             ]
         ],
         "outputLabels": [
@@ -1002,7 +988,8 @@
         "z": "2e3bde7.b715222",
         "name": "Conexion Handler",
         "links": [
-            "90aa193d.ed8d58"
+            "90aa193d.ed8d58",
+            "dd0d973d.55ca98"
         ],
         "x": 364.5,
         "y": 1368,
@@ -1239,7 +1226,7 @@
         "type": "function",
         "z": "2e3bde7.b715222",
         "name": "Enviar a la ESP correspondiente",
-        "func": "if (global.get(\"ESP_Actual\") == \"Todas\"){\n    var topic = \"infind/GRUPO7/+/FOTA\";\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/FOTA\";\n}\nmsg.topic = topic;\nreturn msg;",
+        "func": "if (global.get(\"ESP\") == \"Todas\"){\n    listaG = global.get(\"listaGlobal\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/FOTA\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/FOTA\";\n    msg.topic = topic;\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "x": 381,
@@ -1295,7 +1282,9 @@
         "type": "link out",
         "z": "2e3bde7.b715222",
         "name": "Estado Led",
-        "links": [],
+        "links": [
+            "7ba4b992.177b08"
+        ],
         "x": 1363.5,
         "y": 2094,
         "wires": []
@@ -1412,7 +1401,7 @@
         "id": "518f8754.1378b8",
         "type": "mongodb in",
         "z": "2e3bde7.b715222",
-        "mongodb": "c55fe440.54b448",
+        "mongodb": "bae6b600.bd35e8",
         "name": "",
         "collection": "log",
         "operation": "find",
@@ -1458,8 +1447,8 @@
         "links": [
             "31f9bc86.96eb44"
         ],
-        "x": 101.5,
-        "y": 2861,
+        "x": 95,
+        "y": 2780,
         "wires": [
             [
                 "dc08c5e4.0ed238"
@@ -1474,8 +1463,8 @@
         "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"ESP desconectada de manera prematura\"};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 408.5,
-        "y": 2864,
+        "x": 400,
+        "y": 2780,
         "wires": [
             [
                 "cff52620.230e78"
@@ -1490,8 +1479,8 @@
         "func": "msg.payload.date = new Date();\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 690,
-        "y": 2863,
+        "x": 680,
+        "y": 2780,
         "wires": [
             [
                 "9a1043ce.5b098"
@@ -1577,8 +1566,8 @@
         "console": false,
         "tostatus": false,
         "complete": "true",
-        "x": 659.5,
-        "y": 3205,
+        "x": 790,
+        "y": 3220,
         "wires": []
     },
     {
@@ -1590,8 +1579,8 @@
         "qos": "",
         "retain": "",
         "broker": "b465132d.b97f8",
-        "x": 585,
-        "y": 3101,
+        "x": 790,
+        "y": 3140,
         "wires": []
     },
     {
@@ -1599,11 +1588,11 @@
         "type": "function",
         "z": "2e3bde7.b715222",
         "name": "Enviar a la ESP correspondiente",
-        "func": "if (global.get(\"ESP_Actual\") == \"Todas\"){\n    var topic = \"infind/GRUPO7/+/switch/cmd\";\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/switch/cmd\";\n}\nmsg.topic = topic;\nreturn msg;",
+        "func": "\nif (global.get(\"ESP\") == \"Todas\"){\n    listaG = global.get(\"listaGlobal\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/switch/cmd\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + global.get(\"ESP\")+\"/switch/cmd\";\n    msg.topic = topic;\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
-        "x": 364,
-        "y": 3101,
+        "x": 450,
+        "y": 3140,
         "wires": [
             [
                 "86e100a8.1469b",
@@ -1631,11 +1620,11 @@
         "onicon": "",
         "oncolor": "",
         "offvalue": "{\"level\":\"0\"}",
-        "offvalueType": "str",
+        "offvalueType": "json",
         "officon": "",
         "offcolor": "",
-        "x": 129.5,
-        "y": 3169,
+        "x": 150,
+        "y": 3140,
         "wires": [
             [
                 "eb808ff.b55537"
@@ -1744,6 +1733,1254 @@
         "wires": []
     },
     {
+        "id": "f23a91ea.7d989",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Envio valores sensor",
+        "links": [
+            "b544de67.0ea4b"
+        ],
+        "x": 315,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "9c1d826b.6963e",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Flujo maximo minimo dashboard",
+        "info": "",
+        "x": 190,
+        "y": 3520,
+        "wires": []
+    },
+    {
+        "id": "24601d2c.4fa642",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Obtener ESP correspondiente",
+        "func": "if (global.get(\"ESP\") === \"Todas\"){\n    msg.payload = {\"ChipID\": \"Global\"};\n}else{\n   msg.payload = {\"ChipID\": global.get(\"ESP\")};\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 310,
+        "y": 3640,
+        "wires": [
+            [
+                "ea1b9731.597af8"
+            ]
+        ]
+    },
+    {
+        "id": "dd0d973d.55ca98",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "links": [
+            "b8f8921a.e33f"
+        ],
+        "x": 35,
+        "y": 3380,
+        "wires": [
+            [
+                "d4f3df42.3563d",
+                "64ecffb2.0383e"
+            ]
+        ]
+    },
+    {
+        "id": "173d35b0.79a5fa",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 610,
+        "y": 3380,
+        "wires": [
+            [
+                "84c677e1.7f8b18"
+            ]
+        ]
+    },
+    {
+        "id": "5fcce0e9.687a8",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\": msg.payload.ChipID};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 330,
+        "y": 3380,
+        "wires": [
+            [
+                "173d35b0.79a5fa"
+            ]
+        ]
+    },
+    {
+        "id": "c119b68c.fe73e8",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "maximo minimo primeros valores",
+        "info": "",
+        "x": 150,
+        "y": 3320,
+        "wires": []
+    },
+    {
+        "id": "c552deff.b44c5",
+        "type": "ui_numeric",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Temperatura Mínimo",
+        "tooltip": "",
+        "group": "a8243938.cd7c98",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "temp_min",
+        "format": "{{payload[0].temp.min}}",
+        "min": "-100",
+        "max": "50",
+        "step": 1,
+        "x": 980,
+        "y": 3680,
+        "wires": [
+            [
+                "9291ac2d.3d688"
+            ]
+        ]
+    },
+    {
+        "id": "bf1fca70.7f1a98",
+        "type": "ui_button",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "group": "a8243938.cd7c98",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "label": "Enviar",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "min_max",
+        "payloadType": "global",
+        "topic": "",
+        "x": 130,
+        "y": 3880,
+        "wires": [
+            [
+                "e753f685.35b0f8"
+            ]
+        ]
+    },
+    {
+        "id": "eadff94.778f908",
+        "type": "ui_numeric",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Temperatura Máxima",
+        "tooltip": "",
+        "group": "a8243938.cd7c98",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "temp_max",
+        "format": "{{payload[0].temp.max}}",
+        "min": "-99",
+        "max": "51",
+        "step": 1,
+        "x": 980,
+        "y": 3720,
+        "wires": [
+            [
+                "ec3b073d.c8d308"
+            ]
+        ]
+    },
+    {
+        "id": "44cece64.dfb56",
+        "type": "ui_numeric",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Humedad Máxima",
+        "tooltip": "",
+        "group": "a8243938.cd7c98",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "hum_max",
+        "format": "{{payload[0].hum.max}}",
+        "min": "1",
+        "max": "100",
+        "step": 1,
+        "x": 970,
+        "y": 3800,
+        "wires": [
+            [
+                "50c02f8c.b6b21"
+            ]
+        ]
+    },
+    {
+        "id": "4c8d640e.90544c",
+        "type": "ui_numeric",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "label": "Humedad Mínima",
+        "tooltip": "",
+        "group": "a8243938.cd7c98",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "hum_min",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "99",
+        "step": 1,
+        "x": 970,
+        "y": 3760,
+        "wires": [
+            [
+                "7af8daed.eca454"
+            ]
+        ]
+    },
+    {
+        "id": "ff405e77.c6217",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 470,
+        "y": 3440,
+        "wires": [
+            [
+                "baf6f20.9c8821"
+            ]
+        ]
+    },
+    {
+        "id": "d4f3df42.3563d",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.payload = {\"ChipID\": \"Global\"};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 190,
+        "y": 3440,
+        "wires": [
+            [
+                "ff405e77.c6217"
+            ]
+        ]
+    },
+    {
+        "id": "84c677e1.7f8b18",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "empty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 890,
+        "y": 3380,
+        "wires": [
+            [
+                "81856343.ebe6e"
+            ]
+        ]
+    },
+    {
+        "id": "64ecffb2.0383e",
+        "type": "json",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 190,
+        "y": 3380,
+        "wires": [
+            [
+                "5fcce0e9.687a8"
+            ]
+        ]
+    },
+    {
+        "id": "81856343.ebe6e",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "No Chips vacios",
+        "property": "chipID",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1060,
+        "y": 3380,
+        "wires": [
+            [
+                "a61efd36.7697e"
+            ]
+        ]
+    },
+    {
+        "id": "a61efd36.7697e",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Set min and max",
+        "func": "minmax = global.get(\"MinMax\");\ntemp_ = minmax.temp;\nhum_ = minmax.hum;\nmsg.payload = {\"ChipID\":msg.chipID};\nmsg.payload.temp={\"min\": temp_.min, \"max\": temp_.max};\nmsg.payload.hum={\"min\": hum_.min, \"max\": hum_.max};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1270,
+        "y": 3380,
+        "wires": [
+            [
+                "4737cc6a.83c0c4"
+            ]
+        ]
+    },
+    {
+        "id": "4737cc6a.83c0c4",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "store",
+        "x": 1590,
+        "y": 3380,
+        "wires": []
+    },
+    {
+        "id": "baf6f20.9c8821",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "MinMax",
+                "pt": "global",
+                "to": "payload[0]",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 790,
+        "y": 3440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ea1b9731.597af8",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 410,
+        "y": 3740,
+        "wires": [
+            [
+                "cf3d2f28.5970b",
+                "4411ff94.7b266",
+                "9d5d1975.fca638",
+                "55292d19.7625c4",
+                "4ed4ba30.7942c4"
+            ]
+        ]
+    },
+    {
+        "id": "ec3b073d.c8d308",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "temp_max",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1220,
+        "y": 3720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7af8daed.eca454",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "hum_min",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1210,
+        "y": 3760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "50c02f8c.b6b21",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "hum_max",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1220,
+        "y": 3800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e753f685.35b0f8",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Obtener resultados",
+        "func": "temp_min = global.get(\"temp_min\");\ntemp_max = global.get(\"temp_max\");\nhum_min = global.get(\"hum_min\");\nhum_max = global.get(\"hum_max\");\nif (global.get(\"ESP\") == \"Todas\"){\n    msg.payload = {\"ChipID\": \"Global\"};\n}else{\n   msg.payload = {\"ChipID\": global.get(\"ESP\")};\n}\nmsg.payload.temp = {\"min\": temp_min, \"max\": temp_max};\nmsg.payload.hum = {\"min\": hum_min, \"max\": hum_max};\nmsg.query = {\"_id\": global.get(\"minmax_id\")};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 3880,
+        "wires": [
+            [
+                "7604bbf9.adc864"
+            ]
+        ]
+    },
+    {
+        "id": "7604bbf9.adc864",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "comprobar temperatura",
+        "property": "payload.temp.min",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "payload.temp.max",
+                "vt": "msg"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 650,
+        "y": 3880,
+        "wires": [
+            [
+                "36c3a628.9eb41a"
+            ],
+            [
+                "112f5c51.5d2b44"
+            ]
+        ]
+    },
+    {
+        "id": "36c3a628.9eb41a",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "comprobar humedad",
+        "property": "payload.hum.min",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "payload.hum.max",
+                "vt": "msg"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1040,
+        "y": 3880,
+        "wires": [
+            [
+                "d7f8db0a.313098",
+                "a8f71aee.afae88"
+            ],
+            [
+                "86a10df1.eed73"
+            ]
+        ]
+    },
+    {
+        "id": "7ba4b992.177b08",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "Actualizar valores",
+        "links": [
+            "1f9ce3b2.c1da7c"
+        ],
+        "x": 75,
+        "y": 3560,
+        "wires": [
+            [
+                "96745159.9ce75"
+            ]
+        ]
+    },
+    {
+        "id": "96745159.9ce75",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "if(!global.get(\"ESP_Antigua\") || global.get(\"ESP_Antigua\") !=  msg.payload){\n    global.set(\"ESP_Antigua\", msg.payload);\n    msg.diff = 1;\n}\nelse msg.diff = 0;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 190,
+        "y": 3560,
+        "wires": [
+            [
+                "32e93ad1.55dd56"
+            ]
+        ]
+    },
+    {
+        "id": "32e93ad1.55dd56",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "property": "diff",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 320,
+        "y": 3560,
+        "wires": [
+            [
+                "24601d2c.4fa642"
+            ]
+        ]
+    },
+    {
+        "id": "cf3d2f28.5970b",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.payload = msg.payload[0].temp.min;\nglobal.set(\"temp_min\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 3680,
+        "wires": [
+            [
+                "c552deff.b44c5"
+            ]
+        ]
+    },
+    {
+        "id": "4411ff94.7b266",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.payload = msg.payload[0].temp.max;\nglobal.set(\"temp_max\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 3720,
+        "wires": [
+            [
+                "eadff94.778f908"
+            ]
+        ]
+    },
+    {
+        "id": "9d5d1975.fca638",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.payload = msg.payload[0].hum.min;\nglobal.set(\"hum_min\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 3760,
+        "wires": [
+            [
+                "4c8d640e.90544c"
+            ]
+        ]
+    },
+    {
+        "id": "55292d19.7625c4",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "func": "msg.payload = msg.payload[0].hum.max;\nglobal.set(\"hum_max\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 3800,
+        "wires": [
+            [
+                "44cece64.dfb56"
+            ]
+        ]
+    },
+    {
+        "id": "4ed4ba30.7942c4",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "minmax_id",
+                "pt": "global",
+                "to": "payload[0]._id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 840,
+        "y": 3640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f1ef6c0f.db5f1",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "minmax global",
+        "links": [
+            "db7b46ee.d131f8"
+        ],
+        "x": 1895,
+        "y": 3880,
+        "wires": []
+    },
+    {
+        "id": "db7b46ee.d131f8",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "minmax global",
+        "links": [
+            "f1ef6c0f.db5f1"
+        ],
+        "x": 135,
+        "y": 4100,
+        "wires": [
+            [
+                "ff17a541.bb4b58"
+            ]
+        ]
+    },
+    {
+        "id": "ff17a541.bb4b58",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Busqueda demas Chips",
+        "func": "msg.temp = msg.payload.temp;\nmsg.hum = msg.payload.hum;\nmsg.payload = {\"ChipID\":{\"$not\": {\"$eq\": \"Global\"}}};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 410,
+        "y": 4100,
+        "wires": [
+            [
+                "eab211e5.65d0e"
+            ]
+        ]
+    },
+    {
+        "id": "eab211e5.65d0e",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 830,
+        "y": 4100,
+        "wires": [
+            [
+                "bfd82f9b.449b9"
+            ]
+        ]
+    },
+    {
+        "id": "bfd82f9b.449b9",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Cambio valores Chips",
+        "func": "temp_min = global.get(\"temp_min\");\ntemp_max = global.get(\"temp_max\");\nhum_min = global.get(\"hum_min\");\nhum_max = global.get(\"hum_max\");\nvar lista = msg.payload;\nfor(i=0; i<lista.length;i++){\n    msg.payload = {\"ChipID\": lista[i].ChipID};\n    msg.payload.temp = msg.temp;\n    msg.payload.hum = msg.hum;\n    msg.query = {\"_id\": lista[i]._id};\n    node.send(msg);\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1240,
+        "y": 4100,
+        "wires": [
+            [
+                "af646b88.a8a508",
+                "130f7fbb.1b183"
+            ]
+        ]
+    },
+    {
+        "id": "af646b88.a8a508",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 1590,
+        "y": 4100,
+        "wires": []
+    },
+    {
+        "id": "a8f71aee.afae88",
+        "type": "mongodb out",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 1550,
+        "y": 3840,
+        "wires": []
+    },
+    {
+        "id": "be1db663.beb088",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Cambio valores minmax",
+        "links": [
+            "e973e3cf.b53cb"
+        ],
+        "x": 1895,
+        "y": 3920,
+        "wires": []
+    },
+    {
+        "id": "d7f8db0a.313098",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "Comprobar chip",
+        "property": "payload.ChipID",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Global",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1400,
+        "y": 3900,
+        "wires": [
+            [
+                "f1ef6c0f.db5f1"
+            ],
+            [
+                "130f7fbb.1b183"
+            ]
+        ]
+    },
+    {
+        "id": "130f7fbb.1b183",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje de valores cambiados",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"Valor de Temperatura/Humedad Máxima/Mínima cambiada\"};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1710,
+        "y": 3920,
+        "wires": [
+            [
+                "be1db663.beb088"
+            ]
+        ]
+    },
+    {
+        "id": "e973e3cf.b53cb",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "Envio mensaje minmax y errores",
+        "links": [
+            "be1db663.beb088",
+            "d8c42136.b6e92"
+        ],
+        "x": 535,
+        "y": 2840,
+        "wires": [
+            [
+                "cff52620.230e78"
+            ]
+        ]
+    },
+    {
+        "id": "112f5c51.5d2b44",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje error Temperatura",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Error\", \"Mensaje\": \"Se ha intentado cambiar los valores Máximos y Mínimos de la Temperatura, pero el Mínimo tiene valor más alto que el Máximo\"};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1220,
+        "y": 4000,
+        "wires": [
+            [
+                "d8c42136.b6e92"
+            ]
+        ]
+    },
+    {
+        "id": "d8c42136.b6e92",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Cambio valores minmax",
+        "links": [
+            "e973e3cf.b53cb"
+        ],
+        "x": 1395,
+        "y": 3980,
+        "wires": []
+    },
+    {
+        "id": "86a10df1.eed73",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje error humedad",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Error\", \"Mensaje\": \"Se ha intentado cambiar los valores Máximos y Mínimos de la Humedad, pero el Mínimo tiene valor más alto que el Máximo\"};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1210,
+        "y": 3960,
+        "wires": [
+            [
+                "d8c42136.b6e92"
+            ]
+        ]
+    },
+    {
+        "id": "9291ac2d.3d688",
+        "type": "change",
+        "z": "2e3bde7.b715222",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "temp_min",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1220,
+        "y": 3680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ca943389.5fdaa",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Ver si se ha cambiado el ChipID",
+        "info": "Se debe de hacer esto debido a que como se revisa\ncada 5 segundos si hay un cambio en los dispositivos\ndisponibles, hay que asegurarse que no entre si ya \nse ha visto que sigue siendo el mismo ChipID que antes.\n",
+        "x": 550,
+        "y": 3560,
+        "wires": []
+    },
+    {
+        "id": "5a9c8cae.fd5624",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Obtención de los valores MinMax del ChipID",
+        "info": "",
+        "x": 430,
+        "y": 3800,
+        "wires": []
+    },
+    {
+        "id": "dd9e916c.31ffa",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Envío de los cambios",
+        "info": "",
+        "x": 180,
+        "y": 3840,
+        "wires": []
+    },
+    {
+        "id": "172ac17.8c2603f",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Envío de los cambios de forma global",
+        "info": "",
+        "x": 270,
+        "y": 4040,
+        "wires": []
+    },
+    {
+        "id": "ee3142dc.2319",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Comprobación de los valores temperatura y humedad de los sensores",
+        "info": "",
+        "x": 370,
+        "y": 4300,
+        "wires": []
+    },
+    {
+        "id": "b544de67.0ea4b",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "Obtención valores sensor",
+        "links": [
+            "f23a91ea.7d989"
+        ],
+        "x": 135,
+        "y": 4400,
+        "wires": [
+            [
+                "113a94c0.bcb27b"
+            ]
+        ]
+    },
+    {
+        "id": "113a94c0.bcb27b",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Busqueda Chip",
+        "func": "msg.payload.ChipID = msg.topic.split(\"/\")[2].substr(3);\nmsg.temp=msg.payload.DHT11.temp;\nmsg.hum=msg.payload.DHT11.hum;\nmsg.payload={\"ChipID\": msg.payload.ChipID};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 260,
+        "y": 4400,
+        "wires": [
+            [
+                "66bd8046.bbd89"
+            ]
+        ]
+    },
+    {
+        "id": "66bd8046.bbd89",
+        "type": "mongodb in",
+        "z": "2e3bde7.b715222",
+        "mongodb": "bae6b600.bd35e8",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 570,
+        "y": 4400,
+        "wires": [
+            [
+                "e2c5cb98.9c7208",
+                "2874ad32.881362"
+            ]
+        ]
+    },
+    {
+        "id": "e2c5cb98.9c7208",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "Comprobar temperatura sensor",
+        "property": "temp",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": " msg.payload[0].temp.min",
+                "vt": "str"
+            },
+            {
+                "t": "gt",
+                "v": " msg.payload[0].temp.max",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 970,
+        "y": 4360,
+        "wires": [
+            [
+                "243bda15.882846"
+            ],
+            [
+                "65ce4789.2cb7d8"
+            ]
+        ]
+    },
+    {
+        "id": "2874ad32.881362",
+        "type": "switch",
+        "z": "2e3bde7.b715222",
+        "name": "Comprobar temperatura sensor",
+        "property": "temp",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": " msg.payload[0].temp.min",
+                "vt": "str"
+            },
+            {
+                "t": "gt",
+                "v": " msg.payload[0].temp.max",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 970,
+        "y": 4440,
+        "wires": [
+            [
+                "42c8abfe.a71844"
+            ],
+            [
+                "1d41fbc5.3c01d4"
+            ]
+        ]
+    },
+    {
+        "id": "243bda15.882846",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje Mínimo Temperatura",
+        "func": "var chipID = msg.payload[0].ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"La Temperatura del sensor registrada ha superado el Mínimo\"};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1290,
+        "y": 4340,
+        "wires": [
+            [
+                "e8748f1c.c0a12"
+            ]
+        ]
+    },
+    {
+        "id": "65ce4789.2cb7d8",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje Máximo Temperatura",
+        "func": "var chipID = msg.payload[0].ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"La Temperatura del sensor registrada ha superado el Máximo\"};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1290,
+        "y": 4380,
+        "wires": [
+            [
+                "e8748f1c.c0a12"
+            ]
+        ]
+    },
+    {
+        "id": "42c8abfe.a71844",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje Mínimo Humedad",
+        "func": "var chipID = msg.payload[0].ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"La Humedad del sensor registrada ha superado el Mínimo\"};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1280,
+        "y": 4420,
+        "wires": [
+            [
+                "e8748f1c.c0a12"
+            ]
+        ]
+    },
+    {
+        "id": "1d41fbc5.3c01d4",
+        "type": "function",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje Mámimo Humedad",
+        "func": "var chipID = msg.payload[0].ChipID;\nmsg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Alerta\", \"Mensaje\": \"La Humedad del sensor registrada ha superado el Máximo\"};\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1280,
+        "y": 4460,
+        "wires": [
+            [
+                "e8748f1c.c0a12"
+            ]
+        ]
+    },
+    {
+        "id": "66836a9f.328e24",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje de aviso o error del cambio de Mínimos y Máximos",
+        "info": "",
+        "x": 280,
+        "y": 2840,
+        "wires": []
+    },
+    {
+        "id": "2e7dfd15.76f5f2",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje de aviso de superacion del Mínimo o Máximo de un sensor",
+        "info": "",
+        "x": 260,
+        "y": 2880,
+        "wires": []
+    },
+    {
+        "id": "2b6313b4.6469ec",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "Envio mensaje sensor",
+        "links": [
+            "e8748f1c.c0a12"
+        ],
+        "x": 535,
+        "y": 2880,
+        "wires": [
+            [
+                "cff52620.230e78"
+            ]
+        ]
+    },
+    {
+        "id": "e8748f1c.c0a12",
+        "type": "link out",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje sensor",
+        "links": [
+            "2b6313b4.6469ec"
+        ],
+        "x": 1555,
+        "y": 4400,
+        "wires": []
+    },
+    {
+        "id": "bf02f6eb.bdc518",
+        "type": "link in",
+        "z": "2e3bde7.b715222",
+        "name": "Envio mensaje telegram",
+        "links": [
+            "35e3cb84.f5cbe4"
+        ],
+        "x": 535,
+        "y": 2920,
+        "wires": [
+            [
+                "cff52620.230e78"
+            ]
+        ]
+    },
+    {
+        "id": "a33d1e99.24b2f",
+        "type": "comment",
+        "z": "2e3bde7.b715222",
+        "name": "Mensaje desde Telegram",
+        "info": "",
+        "x": 390,
+        "y": 2920,
+        "wires": []
+    },
+    {
         "id": "b465132d.b97f8",
         "type": "mqtt-broker",
         "z": "",
@@ -1782,7 +3019,7 @@
         "z": "",
         "name": "Gráfica (Temperatura, Humedad)",
         "tab": "ed30b89b.0ab088",
-        "order": 2,
+        "order": 3,
         "disp": true,
         "width": "8",
         "collapse": false
@@ -1793,7 +3030,7 @@
         "z": "",
         "name": "Datos WIFI y ESP8266",
         "tab": "ed30b89b.0ab088",
-        "order": 3,
+        "order": 4,
         "disp": true,
         "width": "6",
         "collapse": false
@@ -1804,7 +3041,7 @@
         "z": "",
         "name": "Control LED",
         "tab": "ed30b89b.0ab088",
-        "order": 4,
+        "order": 5,
         "disp": true,
         "width": "8",
         "collapse": false
@@ -1819,13 +3056,15 @@
         "name": "Conexion a UMA MongoDB Grupo7"
     },
     {
-        "id": "c55fe440.54b448",
-        "type": "mongodb",
+        "id": "a8243938.cd7c98",
+        "type": "ui_group",
         "z": "",
-        "hostname": "iot.ac.uma.es",
-        "port": "27017",
-        "db": "IOT7",
-        "name": "Conexion a UMA MongoDB Grupo7"
+        "name": "Mínimos y Máximos",
+        "tab": "ed30b89b.0ab088",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
     },
     {
         "id": "ed30b89b.0ab088",
