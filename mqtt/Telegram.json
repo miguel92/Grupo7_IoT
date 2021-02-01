@@ -1,189 +1,86 @@
 [
     {
-        "id": "2873e30e.0277ac",
+        "id": "8f0cc18b.c1812",
         "type": "tab",
         "label": "Telegram",
         "disabled": false,
         "info": ""
     },
     {
-        "id": "a2a8d122.4520e",
-        "type": "mongodb in",
-        "z": "2873e30e.0277ac",
-        "mongodb": "bae6b600.bd35e8",
-        "name": "",
-        "collection": "lista_esp",
-        "operation": "find",
-        "x": 670,
-        "y": 1140,
-        "wires": [
-            [
-                "60430a2e.18eea4"
-            ]
-        ]
-    },
-    {
-        "id": "ecbd4e58.6a5ff",
-        "type": "function",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "func": "msg.telegram = msg.payload;\nmsg.payload = {\"Online\" : true};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 430,
-        "y": 1140,
-        "wires": [
-            [
-                "a2a8d122.4520e"
-            ]
-        ]
-    },
-    {
-        "id": "110539c.40602c6",
+        "id": "173fabb2.9e9e44",
         "type": "chatbot-message",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Mensaje bienvenida",
         "message": [
             {
-                "message": "Bienvenido al Bot Grupo 7 {{username}}. Aquí podrá consultar sobre el estado de los aparatos enlazados. También recibirás cualquier notificación que se produzca en el sistema.\nLos siguientes comandos están disponibles:\n/obtener_estado\n/ultimos_valores {id_dispositivo}\n/cambiar_estado {id_dispositivo} {actuador}\nLos dispositivos que están conectado actualmente son los siguientes:\n{{payload.ChipIDS}}"
+                "message": "Bienvenido al Bot Grupo 7 {{username}}. Aquí podrá consultar sobre el estado de los aparatos enlazados. También recibirás cualquier notificación que se produzca en el sistema.\nLos siguientes comandos están disponibles:\n/obtener_estado {id_actuador}\n/ultimos_valores {id_actuador}\n/cambiar_iluminacion {id_actuador} {valor 0-100}\n/activar_desactivar_led {id_actuador} \n/actualizar_actuador {id_actuador} \n\nLos dispositivos que están conectado actualmente son los siguientes:\n{{payload.ChipIDS}}"
             }
         ],
         "language": "es",
-        "x": 1150,
-        "y": 320,
+        "x": 1070,
+        "y": 380,
         "wires": [
             [
-                "de87c5fe.b247f8"
+                "bfcb0926.902658"
             ]
         ]
     },
     {
-        "id": "1a357ce3.cfda83",
-        "type": "function",
-        "z": "2873e30e.0277ac",
-        "name": "Lista ESP",
-        "func": "var list = [];\nvar dispositivos = msg.payload;\nmsg.payload = msg.telegram;\nmsg.payload.ChipIDS='';\n\nmsg.topic='ChipIDs'\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.ChipIDS += (dispositivos[i]['ChipID']) + '\\n';\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 1120,
-        "y": 1200,
-        "wires": [
-            [
-                "fabec215.a308b"
-            ]
-        ]
-    },
-    {
-        "id": "649d2610.cd5d98",
-        "type": "link in",
-        "z": "2873e30e.0277ac",
-        "name": "Obtener dispositivos conectados",
-        "links": [
-            "cd3522ae.e5ffb",
-            "e152bd77.75339"
-        ],
-        "x": 315,
-        "y": 1140,
-        "wires": [
-            [
-                "ecbd4e58.6a5ff"
-            ]
-        ]
-    },
-    {
-        "id": "cd3522ae.e5ffb",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "links": [
-            "649d2610.cd5d98"
-        ],
-        "x": 895,
-        "y": 320,
-        "wires": []
-    },
-    {
-        "id": "fabec215.a308b",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "links": [
-            "2b4161e2.01f37e"
-        ],
-        "x": 1215,
-        "y": 1200,
-        "wires": []
-    },
-    {
-        "id": "2b4161e2.01f37e",
-        "type": "link in",
-        "z": "2873e30e.0277ac",
-        "name": "Dispositivos conectados",
-        "links": [
-            "fabec215.a308b"
-        ],
-        "x": 955,
-        "y": 320,
-        "wires": [
-            [
-                "110539c.40602c6"
-            ]
-        ]
-    },
-    {
-        "id": "ab96766a.0bd378",
+        "id": "cfb8fc9d.98a0f",
         "type": "comment",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Obtener desde db el ultimo estado o valor",
         "info": "Obtener el ultimo valor u estado que tiene los dispositivos.",
-        "x": 940,
-        "y": 400,
+        "x": 760,
+        "y": 460,
         "wires": []
     },
     {
-        "id": "2c5b7381.a81dec",
+        "id": "2bf331e7.bc223e",
         "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "command": "/obtener_estado",
-        "x": 840,
-        "y": 460,
-        "wires": [
-            [
-                "624b2f53.e5745"
-            ]
-        ]
-    },
-    {
-        "id": "563329b8.473f58",
-        "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "command": "/ultimos_valores",
-        "x": 840,
+        "x": 660,
         "y": 520,
         "wires": [
             [
-                "8279ca87.5eb498"
+                "1daf33e8.aa129c"
             ]
         ]
     },
     {
-        "id": "d3d3f367.41a25",
+        "id": "e7cdea07.24dcb8",
         "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
-        "command": "/cambiar_estado_iluminación",
-        "x": 880,
-        "y": 640,
+        "command": "/ultimos_valores",
+        "x": 660,
+        "y": 580,
         "wires": [
-            []
+            [
+                "1633a442.33fbdc"
+            ]
         ]
     },
     {
-        "id": "3ba32eb2.622352",
+        "id": "923aeebc.766c",
+        "type": "chatbot-command",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "command": "/cambiar_iluminacion",
+        "x": 680,
+        "y": 660,
+        "wires": [
+            [
+                "a0f4f3ea.451ef"
+            ]
+        ]
+    },
+    {
+        "id": "3afafc9e.e08af4",
         "type": "change",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Variables",
         "rules": [
             {
@@ -199,65 +96,66 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 600,
-        "y": 540,
+        "x": 440,
+        "y": 580,
         "wires": [
             [
-                "2c5b7381.a81dec",
-                "563329b8.473f58",
-                "d3d3f367.41a25",
-                "b8b675cb.c6ed08",
-                "a5cab213.05958",
-                "47bea467.98285c"
+                "2bf331e7.bc223e",
+                "e7cdea07.24dcb8",
+                "923aeebc.766c",
+                "16161b7e.96a445",
+                "c5753f0d.1b4b2",
+                "2b399b2f.942664",
+                "6ec76441.738bfc"
             ]
         ]
     },
     {
-        "id": "b8b675cb.c6ed08",
+        "id": "16161b7e.96a445",
         "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "command": "/start",
-        "x": 790,
-        "y": 320,
+        "x": 630,
+        "y": 380,
         "wires": [
             [
-                "cd3522ae.e5ffb"
+                "f540e2fc.38ce"
             ]
         ]
     },
     {
-        "id": "de87c5fe.b247f8",
+        "id": "bfcb0926.902658",
         "type": "chatbot-telegram-send",
-        "z": "2873e30e.0277ac",
-        "bot": "9a4528aa.275318",
+        "z": "8f0cc18b.c1812",
+        "bot": "66a71266.d40ccc",
         "botProduction": "",
         "track": false,
         "passThrough": false,
-        "errorOutput": false,
         "outputs": 0,
-        "x": 1450,
-        "y": 460,
+        "x": 1350,
+        "y": 520,
         "wires": []
     },
     {
-        "id": "2520b1c5.45d53e",
+        "id": "e32ba496.0a9868",
         "type": "chatbot-telegram-receive",
-        "z": "2873e30e.0277ac",
-        "bot": "9a4528aa.275318",
+        "z": "8f0cc18b.c1812",
+        "bot": "66a71266.d40ccc",
         "botProduction": "",
-        "x": 190,
-        "y": 420,
+        "x": 90,
+        "y": 500,
         "wires": [
             [
-                "dcd6b3c.303975"
+                "c8918d6a.33f3a",
+                "f2d2d695.3ba448"
             ]
         ]
     },
     {
-        "id": "8a25e0c7.53c82",
+        "id": "d1a3931a.b47e3",
         "type": "chatbot-message",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Log Info",
         "message": [
             {
@@ -265,154 +163,110 @@
             }
         ],
         "language": "es",
-        "x": 1270,
-        "y": 880,
+        "x": 1310,
+        "y": 980,
         "wires": [
             [
-                "9da53858.ccf0b8"
+                "79134a24.0265f4"
             ]
         ]
     },
     {
-        "id": "d04437cc.53cb08",
+        "id": "e95d91b7.c221",
         "type": "link in",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Log Salida",
         "links": [
             "9067e6eb.72f818"
         ],
-        "x": 275,
-        "y": 880,
+        "x": 315,
+        "y": 980,
         "wires": [
             [
-                "4fd62a9a.6e4bf4"
+                "8d9ff96b.362f08"
             ]
         ]
     },
     {
-        "id": "4fd62a9a.6e4bf4",
+        "id": "8d9ff96b.362f08",
         "type": "chatbot-conversation",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
-        "botDevelopment": "9a4528aa.275318",
-        "botProduction": "9a4528aa.275318",
+        "botDevelopment": "66a71266.d40ccc",
+        "botProduction": "66a71266.d40ccc",
         "chatId": "-1001178352887",
         "userId": "",
         "transport": "telegram",
         "store": "",
-        "x": 610,
-        "y": 880,
+        "x": 650,
+        "y": 980,
         "wires": [
             [
-                "8a25e0c7.53c82"
+                "d1a3931a.b47e3"
             ]
         ]
     },
     {
-        "id": "60430a2e.18eea4",
-        "type": "switch",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "property": "topic",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "actuador",
-                "vt": "str"
-            },
-            {
-                "t": "else"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 930,
-        "y": 1140,
-        "wires": [
-            [
-                "4236d47e.e04f3c"
-            ],
-            [
-                "1a357ce3.cfda83"
-            ]
-        ]
-    },
-    {
-        "id": "4236d47e.e04f3c",
+        "id": "3cbb9ab1.b6c4b6",
         "type": "function",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Select ESP",
-        "func": "var dispositivos = msg.payload;\nmsg.payload = msg.telegram;\n\nmsg.payload.message = '¿Cuál actuador quiere seleccionar?';\nmsg.payload.buttons = [];\n\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.buttons.push({type: 'keyboardButton', label: dispositivos[i]['ChipID']});\n    msg.payload.buttons.push({type: 'newline'})\n}\nreturn msg;",
+        "func": "var dispositivos = msg.payload;\nmsg.payload = msg.telegram;\n\nmsg.payload.message = '¿Cuál actuador quiere seleccionar?';\nmsg.payload.buttons = [];\n\n\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.buttons.push({type: 'keyboardButton', label: dispositivos[i]['ChipID']});\n    msg.payload.buttons.push({type: 'newline'});\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 1150,
-        "y": 1100,
+        "x": 1190,
+        "y": 1300,
         "wires": [
             [
-                "6bd99bfb.d070a4"
+                "3934b984.5668b6"
             ]
         ]
     },
     {
-        "id": "624b2f53.e5745",
+        "id": "d90bd4e9.3699a8",
         "type": "link out",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Estado",
         "links": [
-            "55448b00.bf9834"
-        ],
-        "x": 995,
-        "y": 460,
-        "wires": []
-    },
-    {
-        "id": "8279ca87.5eb498",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Valores",
-        "links": [
-            "7c626c82.5915f4"
+            "47721f73.3fcde"
         ],
         "x": 975,
         "y": 520,
         "wires": []
     },
     {
-        "id": "7c626c82.5915f4",
-        "type": "link in",
-        "z": "2873e30e.0277ac",
+        "id": "273a1490.ca213c",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
         "name": "Valores",
         "links": [
-            "8279ca87.5eb498"
+            "47721f73.3fcde"
         ],
-        "x": 255,
-        "y": 1420,
-        "wires": [
-            []
-        ]
+        "x": 975,
+        "y": 580,
+        "wires": []
     },
     {
-        "id": "55448b00.bf9834",
+        "id": "47721f73.3fcde",
         "type": "link in",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "estado",
         "links": [
-            "624b2f53.e5745"
+            "d90bd4e9.3699a8",
+            "273a1490.ca213c"
         ],
-        "x": 255,
-        "y": 1280,
+        "x": 295,
+        "y": 1320,
         "wires": [
             [
-                "e4932993.68cee8"
+                "b39e07a7.f8dac8"
             ]
         ]
     },
     {
-        "id": "e4932993.68cee8",
+        "id": "b39e07a7.f8dac8",
         "type": "switch",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "property": "payload.arguments",
         "propertyType": "msg",
@@ -427,156 +281,66 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 350,
-        "y": 1280,
+        "x": 390,
+        "y": 1320,
         "wires": [
             [
-                "91769a97.1f2168"
+                "fca17083.387f4"
             ],
             [
-                "7699558d.21322c"
+                "c74c264b.a6aa28"
             ]
         ]
     },
     {
-        "id": "e152bd77.75339",
+        "id": "3ee5def.0090622",
         "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Obtener disp",
-        "links": [
-            "649d2610.cd5d98"
-        ],
-        "x": 675,
-        "y": 1260,
-        "wires": []
-    },
-    {
-        "id": "a864c7f3.a962e8",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Obtener valores",
         "links": [
-            "c2fe05d7.cbfd98"
+            "fb1d5696.df8c68"
         ],
-        "x": 675,
-        "y": 1300,
+        "x": 815,
+        "y": 1340,
         "wires": []
     },
     {
-        "id": "c2fe05d7.cbfd98",
+        "id": "fb1d5696.df8c68",
         "type": "link in",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "Obtener valores",
         "links": [
-            "a864c7f3.a962e8",
-            "94fd5039.9db4d"
+            "3ee5def.0090622",
+            "5887e37e.d79f1c",
+            "578801b9.4f816"
         ],
-        "x": 255,
-        "y": 1640,
+        "x": 115,
+        "y": 1520,
         "wires": [
             [
-                "2588faa9.1be3f6",
-                "650baa8b.79fea4"
+                "6584bbde.6239c4"
             ]
         ]
     },
     {
-        "id": "cee3f431.b36608",
-        "type": "function",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "func": "var chipId = msg.payload.arguments[0];\nmsg.telegram = msg.payload;\nmsg.payload = {\"chipID\" : chipId};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 390,
-        "y": 1680,
-        "wires": [
-            [
-                "c97f36d3.e61158"
-            ]
-        ]
-    },
-    {
-        "id": "c97f36d3.e61158",
-        "type": "mongodb in",
-        "z": "2873e30e.0277ac",
-        "mongodb": "bae6b600.bd35e8",
-        "name": "",
-        "collection": "datos_sensores",
-        "operation": "find",
-        "x": 700,
-        "y": 1680,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "2588faa9.1be3f6",
-        "type": "debug",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "x": 390,
-        "y": 1540,
-        "wires": []
-    },
-    {
-        "id": "91769a97.1f2168",
-        "type": "change",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "actuador",
-                "tot": "str"
-            },
-            {
-                "t": "set",
-                "p": "context",
-                "pt": "global",
-                "to": "estado",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 540,
-        "y": 1260,
-        "wires": [
-            [
-                "e152bd77.75339"
-            ]
-        ]
-    },
-    {
-        "id": "6bd99bfb.d070a4",
+        "id": "3934b984.5668b6",
         "type": "chatbot-ask",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "buttons": [],
         "message": "",
         "x": 1370,
-        "y": 1100,
+        "y": 1300,
         "wires": [
             [
-                "e62a6172.257cb"
+                "52b8f660.8a8a18"
             ]
         ]
     },
     {
-        "id": "dcd6b3c.303975",
+        "id": "8bcf8094.404db",
         "type": "switch",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "property": "context",
         "propertyType": "global",
@@ -592,30 +356,886 @@
                 "vt": "str"
             },
             {
+                "t": "eq",
+                "v": "iluminacion",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 5,
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "b029190a.4d9e48"
+            ],
+            [
+                "2c971509.635d2a"
+            ],
+            [
+                "3201801f.2c8a5"
+            ],
+            [],
+            [
+                "1864a3c1.08688c"
+            ]
+        ]
+    },
+    {
+        "id": "6c5003bd.ea77dc",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "context",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 880,
+        "y": 100,
+        "wires": [
+            [
+                "5887e37e.d79f1c"
+            ]
+        ]
+    },
+    {
+        "id": "5887e37e.d79f1c",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Obtener valores",
+        "links": [
+            "fb1d5696.df8c68"
+        ],
+        "x": 1075,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b029190a.4d9e48",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "msg.payload.arguments=[];\nmsg.payload.arguments.push(msg.payload.content);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 100,
+        "wires": [
+            [
+                "6c5003bd.ea77dc"
+            ]
+        ]
+    },
+    {
+        "id": "f7e59e3e.9e3ac",
+        "type": "link in",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "88f3df9e.f603",
+            "52b8f660.8a8a18",
+            "79134a24.0265f4",
+            "43454525.08301c",
+            "1f4df84.c3e6f08",
+            "9a4c39b6.d87dc8",
+            "40b3e64a.2f0948",
+            "53d8b51e.f0706c",
+            "9f8d74d6.01da18",
+            "3b8e2acc.51f4b6",
+            "282b2bad.4f74a4"
+        ],
+        "x": 1140,
+        "y": 520,
+        "wires": [
+            [
+                "bfcb0926.902658"
+            ]
+        ]
+    },
+    {
+        "id": "88f3df9e.f603",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 2115,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "1f34ecc1.25f0a3",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Ultimos valores no encontrado",
+        "message": [
+            {
+                "message": "Últimos valores de ESP {{chipID}} : Se ha intentado obtener  los últimos valores, pero no hay."
+            }
+        ],
+        "language": "es",
+        "x": 1520,
+        "y": 1580,
+        "wires": [
+            [
+                "88f3df9e.f603"
+            ]
+        ]
+    },
+    {
+        "id": "9238e20c.6cfc8",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Otros valores que no son comandos",
+        "info": "Es una continuación del contexto que la convesación sigue.\nSi antes no se ha declarado un contexto, no estraría.",
+        "x": 520,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "8735c614.ebe728",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Commandos",
+        "info": "",
+        "x": 610,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "548aec83.baf984",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Mensaje Log para canal de disfusión",
+        "info": "",
+        "x": 460,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "29dc85f5.9db0ca",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Obtención de dispositivos activos ",
+        "info": "",
+        "x": 470,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "52b8f660.8a8a18",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida de dispositivos",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1475,
+        "y": 1300,
+        "wires": []
+    },
+    {
+        "id": "3a163483.aadedc",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Comprobación ESP Estado y Valor",
+        "info": "",
+        "x": 420,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "79134a24.0265f4",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida de log",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1435,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "c5753f0d.1b4b2",
+        "type": "chatbot-command",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "command": "/activar_led",
+        "x": 650,
+        "y": 700,
+        "wires": [
+            [
+                "98602254.b5444"
+            ]
+        ]
+    },
+    {
+        "id": "2b399b2f.942664",
+        "type": "chatbot-command",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "command": "/actualizar_actuador",
+        "x": 680,
+        "y": 780,
+        "wires": [
+            [
+                "93ae584b.23e028"
+            ]
+        ]
+    },
+    {
+        "id": "1daf33e8.aa129c",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "estado",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 850,
+        "y": 520,
+        "wires": [
+            [
+                "d90bd4e9.3699a8"
+            ]
+        ]
+    },
+    {
+        "id": "1633a442.33fbdc",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "valores",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 850,
+        "y": 580,
+        "wires": [
+            [
+                "273a1490.ca213c"
+            ]
+        ]
+    },
+    {
+        "id": "46b58a9b.0b7c54",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Iluminacion",
+        "links": [
+            "c938e845.b26648"
+        ],
+        "x": 1055,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "12b25a85.5605b5",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "LED",
+        "links": [
+            "c938e845.b26648"
+        ],
+        "x": 1055,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "a0f4f3ea.451ef",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "iluminacion",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 930,
+        "y": 660,
+        "wires": [
+            [
+                "46b58a9b.0b7c54"
+            ]
+        ]
+    },
+    {
+        "id": "98602254.b5444",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "led_1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 930,
+        "y": 700,
+        "wires": [
+            [
+                "12b25a85.5605b5"
+            ]
+        ]
+    },
+    {
+        "id": "2e95e62c.d3c20a",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Actualizar",
+        "links": [
+            "c938e845.b26648"
+        ],
+        "x": 1055,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "93ae584b.23e028",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "actualizar",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 930,
+        "y": 780,
+        "wires": [
+            [
+                "2e95e62c.d3c20a"
+            ]
+        ]
+    },
+    {
+        "id": "fca17083.387f4",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Busqueda Chips",
+        "func": "msg.telegram = msg.payload;\nmsg.payload = {\"ChipID\":{\"$not\": {\"$eq\": \"Global\"}}};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 580,
+        "y": 1300,
+        "wires": [
+            [
+                "74837a37.a44704"
+            ]
+        ]
+    },
+    {
+        "id": "74837a37.a44704",
+        "type": "mongodb in",
+        "z": "8f0cc18b.c1812",
+        "mongodb": "59d619cc.361478",
+        "name": "",
+        "collection": "MinimoMaximo",
+        "operation": "find",
+        "x": 890,
+        "y": 1300,
+        "wires": [
+            [
+                "3cbb9ab1.b6c4b6"
+            ]
+        ]
+    },
+    {
+        "id": "ff58baee.f68fe8",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "context",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 880,
+        "y": 140,
+        "wires": [
+            [
+                "578801b9.4f816"
+            ]
+        ]
+    },
+    {
+        "id": "578801b9.4f816",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Obtener valores",
+        "links": [
+            "fb1d5696.df8c68"
+        ],
+        "x": 1075,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "2c971509.635d2a",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "msg.payload.arguments=[];\nmsg.payload.arguments.push(msg.payload.content);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 140,
+        "wires": [
+            [
+                "ff58baee.f68fe8"
+            ]
+        ]
+    },
+    {
+        "id": "6ae47824.8bbda8",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Ultimos valores encontrado",
+        "message": [
+            {
+                "message": "Últimos valores de ESP {{payload.datos.ChipID}} :\nHora y fecha: {{payload.datos.hora}}\nTemperatura: {{payload.datos.DHT11.temp}} ºC\nHumedad: {{payload.datos.DHT11.hum}} %"
+            }
+        ],
+        "language": "es",
+        "x": 1510,
+        "y": 1520,
+        "wires": [
+            [
+                "88f3df9e.f603"
+            ]
+        ]
+    },
+    {
+        "id": "5685e822.96c668",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Estado controlador encontrado",
+        "message": [
+            {
+                "message": "Estado del actuador ESP {{payload.datos.ChipID}} :\nHora y fecha: {{payload.datos.hora}}\nTiempo activo: {{payload.datos.Uptime}} segundos\nVoltaje: {{payload.datos.Voltaje}} V\nLED: {{payload.datos.LED}}\nWifi - SSID: {{payload.datos.Wifi.SSID}}\nWifi - IP: {{payload.datos.Wifi.IP}}\nWifi - RSSI: {{payload.datos.Wifi.RSSI}}\n\n"
+            }
+        ],
+        "language": "es",
+        "x": 1820,
+        "y": 1400,
+        "wires": [
+            [
+                "88f3df9e.f603"
+            ]
+        ]
+    },
+    {
+        "id": "dd03cdc2.e783f",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Conversión mV a V, mS a S y encendido/apagado",
+        "func": "\nmsg.payload.datos.Uptime = Math.trunc(msg.payload.datos.Uptime/1000);\nmsg.payload.datos.Voltaje = msg.payload.datos.Voltaje/1000;\nmsg.payload.datos.LED = msg.payload.datos.LED === 0 ? \"Apagado\":\"Encendido\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1470,
+        "y": 1400,
+        "wires": [
+            [
+                "5685e822.96c668"
+            ]
+        ]
+    },
+    {
+        "id": "513979b6.2cf9c8",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Estado no encontrado",
+        "message": [
+            {
+                "message": "Estado del actuador ESP {{chipID}} : Desconectado"
+            }
+        ],
+        "language": "es",
+        "x": 1820,
+        "y": 1460,
+        "wires": [
+            [
+                "88f3df9e.f603"
+            ]
+        ]
+    },
+    {
+        "id": "da5e58ac.eef748",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "estado",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "valores",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 910,
+        "y": 1520,
+        "wires": [
+            [
+                "e6e77310.a60a8"
+            ],
+            [
+                "326ef272.ca159e"
+            ]
+        ]
+    },
+    {
+        "id": "6584bbde.6239c4",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "var chipId = msg.payload.arguments[0];\nmsg.chipID = chipId;\nmsg.telegram = msg.payload;\nmsg.payload = {\"ChipID\" : chipId};\nmsg.sort = {\"date\":-1};\nmsg.limit = 1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 210,
+        "y": 1520,
+        "wires": [
+            [
+                "2f263f22.c9e1"
+            ]
+        ]
+    },
+    {
+        "id": "2f263f22.c9e1",
+        "type": "mongodb in",
+        "z": "8f0cc18b.c1812",
+        "mongodb": "59d619cc.361478",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "find",
+        "x": 480,
+        "y": 1520,
+        "wires": [
+            [
+                "cddc930f.2e88c"
+            ]
+        ]
+    },
+    {
+        "id": "cddc930f.2e88c",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "var datos = msg.payload[0];\nmsg.payload = msg.telegram;\nmsg.payload.datos = datos;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 770,
+        "y": 1520,
+        "wires": [
+            [
+                "da5e58ac.eef748"
+            ]
+        ]
+    },
+    {
+        "id": "c74c264b.a6aa28",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "context",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 580,
+        "y": 1340,
+        "wires": [
+            [
+                "3ee5def.0090622"
+            ]
+        ]
+    },
+    {
+        "id": "326ef272.ca159e",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            },
+            {
                 "t": "else"
             }
         ],
         "checkall": "true",
         "repair": false,
-        "outputs": 3,
-        "x": 370,
-        "y": 480,
+        "outputs": 2,
+        "x": 1150,
+        "y": 1560,
         "wires": [
             [
-                "333b5cef.46deb4"
+                "6ae47824.8bbda8"
             ],
-            [],
             [
-                "3ba32eb2.622352"
+                "1f34ecc1.25f0a3"
             ]
         ]
     },
     {
-        "id": "fec04677.bcde78",
+        "id": "d9eba059.b8325",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Select ESP",
+        "func": "var dispositivos = msg.payload;\nmsg.payload = msg.telegram;\n\nmsg.payload.message = '¿Cuál actuador quiere seleccionar?';\nmsg.payload.buttons = [];\n\nmsg.payload.buttons.push({type: 'keyboardButton', label: \"Todas\"});\nmsg.payload.buttons.push({type: 'newline'});\n\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.buttons.push({type: 'keyboardButton', label: dispositivos[i]['ChipID']});\n    msg.payload.buttons.push({type: 'newline'});\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1210,
+        "y": 1680,
+        "wires": [
+            [
+                "522c586a.c82678"
+            ]
+        ]
+    },
+    {
+        "id": "c938e845.b26648",
+        "type": "link in",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambios actuador",
+        "links": [
+            "12b25a85.5605b5",
+            "2e95e62c.d3c20a",
+            "46b58a9b.0b7c54",
+            "254a78a5.ea49b8",
+            "d1c3c467.b367d8"
+        ],
+        "x": 155,
+        "y": 1700,
+        "wires": [
+            [
+                "e46d8de9.992dc"
+            ]
+        ]
+    },
+    {
+        "id": "e46d8de9.992dc",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "payload.arguments",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "empty"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 250,
+        "y": 1700,
+        "wires": [
+            [
+                "6a689c65.98d9a4"
+            ],
+            [
+                "2de93ee5.9f6262"
+            ]
+        ]
+    },
+    {
+        "id": "834ccf5c.b02bf",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambiar iluminacion",
+        "links": [
+            "16c54fc8.93078"
+        ],
+        "x": 1395,
+        "y": 1820,
+        "wires": []
+    },
+    {
+        "id": "522c586a.c82678",
+        "type": "chatbot-ask",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "buttons": [],
+        "message": "",
+        "x": 1390,
+        "y": 1680,
+        "wires": [
+            [
+                "43454525.08301c"
+            ]
+        ]
+    },
+    {
+        "id": "43454525.08301c",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida de dispositivos",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1555,
+        "y": 1680,
+        "wires": []
+    },
+    {
+        "id": "1bac5416.6ed79c",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Comprobación ESP Cambios Actuador",
+        "info": "",
+        "x": 450,
+        "y": 1640,
+        "wires": []
+    },
+    {
+        "id": "6a689c65.98d9a4",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Busqueda Chips",
+        "func": "msg.telegram = msg.payload;\nmsg.payload = {\"Online\" : true};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 600,
+        "y": 1680,
+        "wires": [
+            [
+                "5ffd827a.584e7c"
+            ]
+        ]
+    },
+    {
+        "id": "924ee1c7.81d3b",
         "type": "change",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "context",
+                "tot": "global"
+            },
             {
                 "t": "set",
                 "p": "context",
@@ -625,9 +1245,9 @@
             },
             {
                 "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "Obtención del Estado",
+                "p": "ESP_ilu",
+                "pt": "global",
+                "to": "",
                 "tot": "str"
             }
         ],
@@ -636,118 +1256,198 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 740,
-        "y": 100,
+        "x": 1220,
+        "y": 1820,
         "wires": [
             [
-                "94fd5039.9db4d"
+                "834ccf5c.b02bf"
             ]
         ]
     },
     {
-        "id": "94fd5039.9db4d",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Obtener valores",
-        "links": [
-            "c2fe05d7.cbfd98"
+        "id": "aaf348a5.ff9f18",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "valido",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "else"
+            }
         ],
-        "x": 935,
-        "y": 100,
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1150,
+        "y": 1420,
+        "wires": [
+            [
+                "dd03cdc2.e783f"
+            ],
+            [
+                "513979b6.2cf9c8"
+            ]
+        ]
+    },
+    {
+        "id": "dd3ec1cb.29aaf",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "context",
+        "propertyType": "global",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "iluminacion",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 790,
+        "y": 1800,
+        "wires": [
+            [
+                "2c870fe5.02f2f"
+            ],
+            [
+                "385ba5e.e97345a"
+            ]
+        ]
+    },
+    {
+        "id": "254a78a5.ea49b8",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Estado Actuador",
+        "links": [
+            "c938e845.b26648"
+        ],
+        "x": 1035,
+        "y": 200,
         "wires": []
     },
     {
-        "id": "333b5cef.46deb4",
+        "id": "1864a3c1.08688c",
         "type": "function",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "func": "msg.payload.arguments=[];\nmsg.payload.arguments.push(msg.payload.content);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 550,
-        "y": 100,
+        "x": 690,
+        "y": 220,
         "wires": [
             [
-                "fec04677.bcde78"
+                "254a78a5.ea49b8"
             ]
         ]
     },
     {
-        "id": "4cf2cba.8c68c34",
-        "type": "link in",
-        "z": "2873e30e.0277ac",
-        "name": "Salida",
-        "links": [
-            "8ca6b596.903248",
-            "e62a6172.257cb",
-            "9da53858.ccf0b8"
-        ],
-        "x": 1240,
-        "y": 460,
-        "wires": [
-            [
-                "de87c5fe.b247f8"
-            ]
-        ]
-    },
-    {
-        "id": "8ca6b596.903248",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Salida",
-        "links": [
-            "4cf2cba.8c68c34"
-        ],
-        "x": 1135,
-        "y": 1680,
-        "wires": []
-    },
-    {
-        "id": "219573d9.f7902c",
-        "type": "chatbot-message",
-        "z": "2873e30e.0277ac",
+        "id": "3201801f.2c8a5",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
         "name": "",
+        "func": "msg.payload.arguments=[];  \nif(global.get(\"ESP_ilu\")){\n    msg.payload.arguments.push(global.get(\"ESP_ilu\"));\n} else{\n    global.set(\"ESP_ilu\",msg.payload.content);\n}\nmsg.payload.arguments.push(msg.payload.content);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 180,
+        "wires": [
+            [
+                "254a78a5.ea49b8"
+            ]
+        ]
+    },
+    {
+        "id": "ec915d8d.fc457",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Valor iluminación",
         "message": [
             {
-                "message": "{{topic}} : ESP  {{payload.chipID}} ha intentado obtener  el valor, pero no pudo."
+                "message": "¿Cuál es el nuevo valor de la iluminación? (Valor entre 0 y 100)"
             }
         ],
         "language": "es",
-        "x": 670,
-        "y": 1620,
+        "x": 1240,
+        "y": 1740,
         "wires": [
             [
-                "8ca6b596.903248"
+                "1f4df84.c3e6f08"
             ]
         ]
     },
     {
-        "id": "650baa8b.79fea4",
-        "type": "function",
-        "z": "2873e30e.0277ac",
+        "id": "2c870fe5.02f2f",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
         "name": "",
-        "func": "msg.payload.chipID = msg.payload.arguments[0];\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 410,
-        "y": 1620,
+        "property": "payload.arguments.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 970,
+        "y": 1780,
         "wires": [
             [
-                "219573d9.f7902c"
+                "ec915d8d.fc457"
+            ],
+            [
+                "924ee1c7.81d3b"
             ]
         ]
     },
     {
-        "id": "7699558d.21322c",
+        "id": "1f4df84.c3e6f08",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida de dispositivos",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1455,
+        "y": 1740,
+        "wires": []
+    },
+    {
+        "id": "385ba5e.e97345a",
         "type": "change",
-        "z": "2873e30e.0277ac",
+        "z": "8f0cc18b.c1812",
         "name": "",
         "rules": [
             {
                 "t": "set",
                 "p": "topic",
                 "pt": "msg",
-                "to": "Obtención del Estado",
+                "to": "context",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "",
                 "tot": "str"
             }
         ],
@@ -756,123 +1456,791 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 530,
-        "y": 1300,
+        "x": 1000,
+        "y": 1880,
         "wires": [
             [
-                "a864c7f3.a962e8"
+                "44d58bbd.64ba34"
             ]
         ]
     },
     {
-        "id": "b7c1d60e.ded158",
-        "type": "comment",
-        "z": "2873e30e.0277ac",
-        "name": "Otros valores que no son comandos",
-        "info": "Es una continuación del contexto que la convesación sigue.\nSi antes no se ha declarado un contexto, no estraría.",
-        "x": 520,
-        "y": 60,
-        "wires": []
-    },
-    {
-        "id": "a9553bd0.79cfa8",
-        "type": "comment",
-        "z": "2873e30e.0277ac",
-        "name": "Commandos",
-        "info": "",
-        "x": 730,
-        "y": 260,
-        "wires": []
-    },
-    {
-        "id": "1b00836a.94324d",
-        "type": "comment",
-        "z": "2873e30e.0277ac",
-        "name": "Mensaje Log para canal de disfusión",
-        "info": "",
-        "x": 420,
-        "y": 820,
-        "wires": []
-    },
-    {
-        "id": "4c83a9bc.34e1e8",
-        "type": "comment",
-        "z": "2873e30e.0277ac",
-        "name": "Obtención de dispositivos activos",
-        "info": "",
-        "x": 430,
-        "y": 1060,
-        "wires": []
-    },
-    {
-        "id": "e62a6172.257cb",
+        "id": "44d58bbd.64ba34",
         "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Salida de dispositivos",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambiar Actuador",
         "links": [
-            "4cf2cba.8c68c34"
+            "16c54fc8.93078"
         ],
-        "x": 1495,
-        "y": 1100,
+        "x": 1195,
+        "y": 1880,
         "wires": []
     },
     {
-        "id": "a802c465.302e58",
-        "type": "comment",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "info": "",
-        "x": 300,
-        "y": 1200,
-        "wires": []
-    },
-    {
-        "id": "9da53858.ccf0b8",
-        "type": "link out",
-        "z": "2873e30e.0277ac",
-        "name": "Salida de log",
+        "id": "16c54fc8.93078",
+        "type": "link in",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambio Actuador",
         "links": [
-            "4cf2cba.8c68c34"
+            "44d58bbd.64ba34",
+            "834ccf5c.b02bf"
+        ],
+        "x": 235,
+        "y": 2240,
+        "wires": [
+            [
+                "e803b34d.225bf"
+            ]
+        ]
+    },
+    {
+        "id": "82678b5.6505078",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "iluminacion",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "led_1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "led_0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "actualizar",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 550,
+        "y": 2240,
+        "wires": [
+            [
+                "cad3a488.173328"
+            ],
+            [
+                "d8b10f4.fe4dff",
+                "96e0d80a.370978"
+            ],
+            [
+                "d170e3ad.3fb8c",
+                "c7355eb.454f8a"
+            ],
+            [
+                "c2702e62.ea52f",
+                "f4905d76.3041"
+            ]
+        ]
+    },
+    {
+        "id": "495304b0.17264c",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "payload.LED",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "btwn",
+                "v": "0",
+                "vt": "num",
+                "v2": "100",
+                "v2t": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 870,
+        "y": 2100,
+        "wires": [
+            [
+                "c04b2626.e899f8",
+                "ca70a921.24c658"
+            ],
+            [
+                "b53e4684.44db98",
+                "d13a4c7d.96a34"
+            ]
+        ]
+    },
+    {
+        "id": "9a4c39b6.d87dc8",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1435,
+        "y": 2020,
+        "wires": []
+    },
+    {
+        "id": "c04b2626.e899f8",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambio iluminación",
+        "message": [
+            {
+                "message": "Se ha cambiado la iluminación"
+            }
+        ],
+        "language": "es",
+        "x": 1170,
+        "y": 2020,
+        "wires": [
+            [
+                "9a4c39b6.d87dc8"
+            ]
+        ]
+    },
+    {
+        "id": "ca70a921.24c658",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "var chipID = msg.payload.ChipID;\nvar level = msg.payload.LED;\n\nmsg.payload = {\"level\": level};\n\nif (chipID == \"Todas\"){\n    listaG = global.get(\"lista_esp\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/led/cmd\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + chipID +\"/led/cmd\";\n    msg.topic = topic;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1190,
+        "y": 2080,
+        "wires": [
+            [
+                "25f97c60.5ff364"
+            ]
+        ]
+    },
+    {
+        "id": "25f97c60.5ff364",
+        "type": "mqtt out",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "broker": "96333b52.ee2b68",
+        "x": 1430,
+        "y": 2080,
+        "wires": []
+    },
+    {
+        "id": "d13a4c7d.96a34",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Mensaje error Iluminación",
+        "func": "var chipID = msg.payload.ChipID;\nvar level = msg.payload.LED;\n\nif (chipID == \"Todas\"){\n    listaG = global.get(\"listaGlobal\");\n    for(var i=0; i<listaG.length;i++){\n    msg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Error\", \"Mensaje\": \"Se ha intentado cambiar el valor de la intencidad de la luz, pero el valor no esta contenido entre 0 y 100\"};\n    node.send(msg);\n\n    }\n}else{\n    msg.payload = {\"ChipID\" : chipID, \"Tipo\" : \"Error\", \"Mensaje\": \"Se ha intentado cambiar el valor de la intencidad de la luz, pero el valor no esta contenido entre 0 y 100\"};\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1170,
+        "y": 2160,
+        "wires": [
+            [
+                "239273ad.1bc0ec"
+            ]
+        ]
+    },
+    {
+        "id": "b53e4684.44db98",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Error Iluminación",
+        "message": [
+            {
+                "message": "ERROR: El valor no esta entre 0 y 100."
+            },
+            {
+                "message": "Para volver a realizar la acción escriba otra vez /cambiar_iluminacion con los parámetros {id_actuador} {level}"
+            }
+        ],
+        "language": "es",
+        "x": 1160,
+        "y": 2120,
+        "wires": [
+            [
+                "40b3e64a.2f0948"
+            ]
+        ]
+    },
+    {
+        "id": "40b3e64a.2f0948",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
         ],
         "x": 1395,
-        "y": 880,
+        "y": 2120,
         "wires": []
     },
     {
-        "id": "a5cab213.05958",
-        "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
+        "id": "239273ad.1bc0ec",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Mensaje error telegram",
+        "links": [
+            "bf02f6eb.bdc518"
+        ],
+        "x": 1395,
+        "y": 2160,
+        "wires": []
+    },
+    {
+        "id": "5ffd827a.584e7c",
+        "type": "mongodb in",
+        "z": "8f0cc18b.c1812",
+        "mongodb": "59d619cc.361478",
         "name": "",
-        "command": "/cambiar_estado_led_activar",
-        "x": 880,
-        "y": 680,
+        "collection": "lista_esp",
+        "operation": "find",
+        "x": 910,
+        "y": 1680,
+        "wires": [
+            [
+                "d9eba059.b8325"
+            ]
+        ]
+    },
+    {
+        "id": "c8918d6a.33f3a",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "msg.payload = {\"Online\": true};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 860,
+        "wires": [
+            [
+                "cfd074b1.a88fc8"
+            ]
+        ]
+    },
+    {
+        "id": "cfd074b1.a88fc8",
+        "type": "mongodb in",
+        "z": "8f0cc18b.c1812",
+        "mongodb": "59d619cc.361478",
+        "name": "",
+        "collection": "lista_esp",
+        "operation": "find",
+        "x": 650,
+        "y": 860,
+        "wires": [
+            [
+                "d2b3bb3c.1b64f8"
+            ]
+        ]
+    },
+    {
+        "id": "4487d488.47d5bc",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "lista_esp",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1090,
+        "y": 860,
         "wires": [
             []
         ]
     },
     {
-        "id": "47bea467.98285c",
-        "type": "chatbot-command",
-        "z": "2873e30e.0277ac",
-        "name": "",
-        "command": "/cambiar_estado_led_desactivar",
-        "x": 890,
-        "y": 720,
+        "id": "f540e2fc.38ce",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Lista ESP",
+        "func": "var list = [];\nvar dispositivos = global.get(\"lista_esp\");\nmsg.payload.ChipIDS='';\nif(dispositivos){\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.ChipIDS += (dispositivos[i]) + '\\n';\n}}\nelse{\n    msg.payload.ChipIDS='No hay actuadores disponibles'\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 820,
+        "y": 380,
         "wires": [
-            []
+            [
+                "173fabb2.9e9e44"
+            ]
         ]
     },
     {
-        "id": "bae6b600.bd35e8",
-        "type": "mongodb",
-        "z": "",
-        "hostname": "iot.ac.uma.es",
-        "port": "27017",
-        "db": "IOT7",
-        "name": "Conexion a UMA MongoDB Grupo7"
+        "id": "ba047217.cc34f",
+        "type": "comment",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambios en actuadores",
+        "info": "Obtener el ultimo valor u estado que tiene los dispositivos.",
+        "x": 680,
+        "y": 620,
+        "wires": []
     },
     {
-        "id": "9a4528aa.275318",
+        "id": "d2b3bb3c.1b64f8",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "To List",
+        "func": "var dispositivos = msg.payload;\nmsg.payload=[];\nif(dispositivos){\nfor (var i=0; i<dispositivos.length; i++){\n    msg.payload.push(dispositivos[i]['ChipID']);\n}}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 910,
+        "y": 860,
+        "wires": [
+            [
+                "4487d488.47d5bc"
+            ]
+        ]
+    },
+    {
+        "id": "6af60a05.18f874",
+        "type": "switch",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "property": "valido",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 450,
+        "y": 1780,
+        "wires": [
+            [
+                "dd3ec1cb.29aaf"
+            ],
+            [
+                "2e28296c.eb4b76"
+            ]
+        ]
+    },
+    {
+        "id": "f2d2d695.3ba448",
+        "type": "delay",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 280,
+        "y": 500,
+        "wires": [
+            [
+                "8bcf8094.404db",
+                "3afafc9e.e08af4"
+            ]
+        ]
+    },
+    {
+        "id": "2e28296c.eb4b76",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Error Actuador",
+        "message": [
+            {
+                "message": "El dispositivo actualmente está inactivo"
+            }
+        ],
+        "language": "es",
+        "x": 690,
+        "y": 1940,
+        "wires": [
+            [
+                "1d5e0ec2.3ffaa1"
+            ]
+        ]
+    },
+    {
+        "id": "53d8b51e.f0706c",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1195,
+        "y": 1940,
+        "wires": []
+    },
+    {
+        "id": "1d5e0ec2.3ffaa1",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "context",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "ESP_ilu",
+                "pt": "global",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 1940,
+        "wires": [
+            [
+                "53d8b51e.f0706c"
+            ]
+        ]
+    },
+    {
+        "id": "e803b34d.225bf",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "msg.payload.ChipID= msg.payload.arguments[0];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 370,
+        "y": 2240,
+        "wires": [
+            [
+                "82678b5.6505078"
+            ]
+        ]
+    },
+    {
+        "id": "9f8d74d6.01da18",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1275,
+        "y": 2220,
+        "wires": []
+    },
+    {
+        "id": "d8b10f4.fe4dff",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambio LED",
+        "message": [
+            {
+                "message": "Se ha activado LED"
+            }
+        ],
+        "language": "es",
+        "x": 990,
+        "y": 2220,
+        "wires": [
+            [
+                "9f8d74d6.01da18"
+            ]
+        ]
+    },
+    {
+        "id": "96e0d80a.370978",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"level\": 1};\nif (chipID == \"Todas\"){\n    listaG = global.get(\"lista_esp\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/switch/cmd\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + chipID +\"/switch/cmd\";\n    msg.topic = topic;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1030,
+        "y": 2260,
+        "wires": [
+            [
+                "c8a81ca7.be8b7"
+            ]
+        ]
+    },
+    {
+        "id": "c8a81ca7.be8b7",
+        "type": "mqtt out",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "broker": "96333b52.ee2b68",
+        "x": 1270,
+        "y": 2260,
+        "wires": []
+    },
+    {
+        "id": "3b8e2acc.51f4b6",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1275,
+        "y": 2420,
+        "wires": []
+    },
+    {
+        "id": "c2702e62.ea52f",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Actualización",
+        "message": [
+            {
+                "message": "Se esta actualizando actuador"
+            }
+        ],
+        "language": "es",
+        "x": 990,
+        "y": 2420,
+        "wires": [
+            [
+                "3b8e2acc.51f4b6"
+            ]
+        ]
+    },
+    {
+        "id": "8cc644ea.e3b2c8",
+        "type": "mqtt out",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "broker": "96333b52.ee2b68",
+        "x": 1270,
+        "y": 2460,
+        "wires": []
+    },
+    {
+        "id": "6ec76441.738bfc",
+        "type": "chatbot-command",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "command": "/desactivar_led",
+        "x": 660,
+        "y": 740,
+        "wires": [
+            [
+                "2fd35f22.7f6e"
+            ]
+        ]
+    },
+    {
+        "id": "d1c3c467.b367d8",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "LED",
+        "links": [
+            "c938e845.b26648"
+        ],
+        "x": 1055,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "2fd35f22.7f6e",
+        "type": "change",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "context",
+                "pt": "global",
+                "to": "led_0",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 930,
+        "y": 740,
+        "wires": [
+            [
+                "d1c3c467.b367d8"
+            ]
+        ]
+    },
+    {
+        "id": "282b2bad.4f74a4",
+        "type": "link out",
+        "z": "8f0cc18b.c1812",
+        "name": "Salida",
+        "links": [
+            "f7e59e3e.9e3ac"
+        ],
+        "x": 1275,
+        "y": 2320,
+        "wires": []
+    },
+    {
+        "id": "d170e3ad.3fb8c",
+        "type": "chatbot-message",
+        "z": "8f0cc18b.c1812",
+        "name": "Cambio LED",
+        "message": [
+            {
+                "message": "Se ha desactivado LED"
+            }
+        ],
+        "language": "es",
+        "x": 990,
+        "y": 2320,
+        "wires": [
+            [
+                "282b2bad.4f74a4"
+            ]
+        ]
+    },
+    {
+        "id": "c7355eb.454f8a",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "var chipID = msg.payload.ChipID;\nmsg.payload = {\"level\": 0};\nif (chipID == \"Todas\"){\n    listaG = global.get(\"lista_esp\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/switch/cmd\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + chipID +\"/switch/cmd\";\n    msg.topic = topic;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1030,
+        "y": 2360,
+        "wires": [
+            [
+                "8551b6b1.1f8b28"
+            ]
+        ]
+    },
+    {
+        "id": "8551b6b1.1f8b28",
+        "type": "mqtt out",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "broker": "96333b52.ee2b68",
+        "x": 1270,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "cad3a488.173328",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "",
+        "func": "msg.payload.LED = msg.payload.arguments[1];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 730,
+        "y": 2100,
+        "wires": [
+            [
+                "495304b0.17264c"
+            ]
+        ]
+    },
+    {
+        "id": "f4905d76.3041",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Enviar a la ESP correspondiente",
+        "func": "var chipID = msg.payload.ChipID;\nif (chipID == \"Todas\"){\n    listaG = global.get(\"lista_esp\");\n    for(var i=0; i<listaG.length;i++){\n        var topic = \"infind/GRUPO7/ESP\"+listaG[i]+\"/FOTA\";\n        msg.topic = topic;\n        node.send(msg);\n\n    }\n}else{\n    var topic = \"infind/GRUPO7/ESP\" + chipID +\"/FOTA\";\n    msg.topic = topic;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1030,
+        "y": 2460,
+        "wires": [
+            [
+                "8cc644ea.e3b2c8"
+            ]
+        ]
+    },
+    {
+        "id": "e6e77310.a60a8",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Comprobar conexion",
+        "func": "var esps = global.get(\"lista_esp\");\nmsg.valido= esps.includes(msg.chipID);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 940.6667175292969,
+        "y": 1418.3334159851074,
+        "wires": [
+            [
+                "aaf348a5.ff9f18"
+            ]
+        ]
+    },
+    {
+        "id": "2de93ee5.9f6262",
+        "type": "function",
+        "z": "8f0cc18b.c1812",
+        "name": "Comprobar conexion",
+        "func": "var chipID = msg.payload.arguments[0];\nvar esps = global.get(\"lista_esp\");\nmsg.valido= esps.includes(chipID) || chipID==\"Todas\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 263.6666564941406,
+        "y": 1818,
+        "wires": [
+            [
+                "6af60a05.18f874"
+            ]
+        ]
+    },
+    {
+        "id": "66a71266.d40ccc",
         "type": "chatbot-telegram-node",
         "z": "",
         "botname": "momf_grupo7_iot_bot",
@@ -884,5 +2252,36 @@
         "debug": false,
         "webHook": "",
         "connectMode": "polling"
+    },
+    {
+        "id": "59d619cc.361478",
+        "type": "mongodb",
+        "z": "",
+        "hostname": "iot.ac.uma.es",
+        "port": "27017",
+        "db": "IOT7",
+        "name": "Conexion a UMA MongoDB Grupo7"
+    },
+    {
+        "id": "96333b52.ee2b68",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "",
+        "broker": "iot.ac.uma.es",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
     }
 ]
