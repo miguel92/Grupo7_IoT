@@ -33,5 +33,5 @@
 *.bin
 
 # Config
-**/config.h
+
 
