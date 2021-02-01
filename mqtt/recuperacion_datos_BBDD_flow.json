@@ -1,0 +1,1734 @@
+[
+    {
+        "id": "f8acce6d.f9c8d8",
+        "type": "tab",
+        "label": "Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2f79011c.b114ae",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 190,
+        "y": 240,
+        "wires": [
+            [
+                "3df5970f.1159"
+            ]
+        ]
+    },
+    {
+        "id": "d7672966.70772",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "find",
+        "x": 640,
+        "y": 240,
+        "wires": [
+            [
+                "b5743d8.c73f4c",
+                "71b9a452.f2814c",
+                "532ab37e.17bac4",
+                "f70cd9d4.64d7d8"
+            ]
+        ]
+    },
+    {
+        "id": "38925d89.37b6d2",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Selector de ESP",
+        "info": "",
+        "x": 100,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "dfa1d8f.63c3ca8",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "agrega por días",
+        "func": "// fecha por defecto es hoy\nvar ahora = new Date();\nif (msg.payload === 0){ //Ultima semana\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 7);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else if (msg.payload === 1){ //Ultimo dia\n    var desde = new Date();\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n} else if (msg.payload === 2){ //Ultimo mes\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 30);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else {\n    var desde = new Date(global.get(\"desde\") || ahora);\n    var hasta = new Date(global.get(\"hasta\") || ahora); \n\n    global.set(\"desde\", desde)\n    global.set(\"hasta\", hasta)\n}\n\n// pillo los globales si los hay, si no la fecha de hoy\nvar desde = new Date(global.get(\"desde\"));\nvar hasta = new Date(global.get(\"hasta\"));\n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),1,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),24,59,59,99);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n        \"date\": 1,\n        \"temperatura\": \"$DHT11.temp\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": { \n        \"$dateFromParts\" : {\n            \"year\": { \"$year\": \"$date\" }, \n            \"month\": { \"$month\": \"$date\" },\n            \"day\": { \"$dayOfMonth\": \"$date\" }\n        }},\n\n        \"Tmedia\":{\"$avg\":\"$temperatura\"},\n        \"Tmax\":  {\"$max\":\"$temperatura\"},\n        \"Tmin\":  {\"$min\":\"$temperatura\"},\n        \"datos\": {\"$sum\":1},\n    }},\n    { \"$sort\": {\"_id\": 1} }\n];\n\n}else{\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)} } },\n    { \"$project\": {\n        \"date\": 1,\n        \"temperatura\": \"$DHT11.temp\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": { \n        \"$dateFromParts\" : {\n            \"year\": { \"$year\": \"$date\" }, \n            \"month\": { \"$month\": \"$date\" },\n            \"day\": { \"$dayOfMonth\": \"$date\" }\n        }},\n\n        \"Tmedia\":{\"$avg\":\"$temperatura\"},\n        \"Tmax\":  {\"$max\":\"$temperatura\"},\n        \"Tmin\":  {\"$min\":\"$temperatura\"},\n        \"datos\": {\"$sum\":1},\n    }},\n    { \"$sort\": {\"_id\": 1} }\n];\n  \n    \n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 400,
+        "y": 800,
+        "wires": [
+            [
+                "948da35f.8e71d"
+            ]
+        ]
+    },
+    {
+        "id": "948da35f.8e71d",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 660,
+        "y": 800,
+        "wires": [
+            [
+                "4cb0b8f7.27dd1"
+            ]
+        ]
+    },
+    {
+        "id": "4cb0b8f7.27dd1",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "genera datos gráfica",
+        "func": "var arrayavg=[];\nvar arraymax=[];\nvar arraymin=[];\n\n// los arrays usados en la represenstación gráfica deben contener objetos JSON con dos campos: {x , y}\n// en x debemos poner la hora en formato \"timestamp\". Si tenemos un objeto fecha se puede convertir usando el método getTime()\n// en y debemos poner el valor de la variable\n// mas info en: https://github.com/node-red/node-red-dashboard/blob/master/Charts.md\n\nif(Array.isArray(msg.payload) && msg.payload.length>0)\n{\n    for (var i = 0; i < msg.payload.length; i++) { // añade datos a los array\n        arrayavg.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Tmedia.toFixed(2)});\n        arraymax.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Tmax.toFixed(2)});\n        arraymin.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Tmin.toFixed(2)});\n    }\n}\n    \nmsg.payload = [{\n        \"series\":[\"T.media\",\"T.max\",\"T.min\"],\n        \"data\":[arrayavg, arraymax, arraymin],\n        \"labels\":[\"\"]\n        }];\n\nreturn msg;  ",
+        "outputs": "1",
+        "noerr": 0,
+        "x": 980,
+        "y": 800,
+        "wires": [
+            [
+                "6674255a.c6dae4"
+            ]
+        ]
+    },
+    {
+        "id": "6674255a.c6dae4",
+        "type": "ui_chart",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "c13a8500.6a285",
+        "order": 15,
+        "width": "9",
+        "height": "6",
+        "label": "Temperaturas",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "D/M",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#008000",
+            "#ff0000",
+            "#0080ff",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1200,
+        "y": 800,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "9490c934.f90248",
+        "type": "change",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "desde",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 380,
+        "wires": [
+            [
+                "e8a47747.998b9"
+            ]
+        ]
+    },
+    {
+        "id": "d873e1f2.8b6a98",
+        "type": "change",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "hasta",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 420,
+        "wires": [
+            [
+                "e8a47747.998b9"
+            ]
+        ]
+    },
+    {
+        "id": "e8a47747.998b9",
+        "type": "link out",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "links": [
+            "166b0304.5667ad"
+        ],
+        "x": 629.7700500488281,
+        "y": 406.7074279785156,
+        "wires": []
+    },
+    {
+        "id": "166b0304.5667ad",
+        "type": "link in",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "links": [
+            "e8a47747.998b9",
+            "e2a9174e.fef438"
+        ],
+        "x": 95,
+        "y": 860,
+        "wires": [
+            [
+                "dfa1d8f.63c3ca8",
+                "6c211b16.371d0c",
+                "f9603dd8.9b167",
+                "7f79335a.0ecfa4",
+                "d83488da.a7caf8"
+            ]
+        ]
+    },
+    {
+        "id": "7f79335a.0ecfa4",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "agreaga todo",
+        "func": "// fecha por defecto es hoy\nvar ahora = new Date();\nif (msg.payload === 0){ //Ultima semana\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 7);\n    \n    global.set(\"desde2\", desde)\n    global.set(\"hasta2\", ahora)\n}else if (msg.payload === 1){ //Ultimo dia\n    var desde = new Date();\n    \n    global.set(\"desde2\", desde)\n    global.set(\"hasta2\", ahora)\n} else if (msg.payload === 2){ //Ultimo mes\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 30);\n    \n    global.set(\"desde2\", desde)\n    global.set(\"hasta2\", ahora)\n}else {\n    var desde = new Date(global.get(\"desde\") || ahora);\n    var hasta = new Date(global.get(\"hasta\") || ahora); \n\n    global.set(\"desde2\", desde)\n    global.set(\"hasta2\", hasta)\n}\n\n// pillo los globales si los hay, si no la fecha de hoy\nvar desde = new Date(global.get(\"desde2\"));\nvar hasta = new Date(global.get(\"hasta2\")); \n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),1,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),24,59,59,99);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n    msg.payload=\n    [\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n            \"temperatura\": \"$DHT11.temp\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": 0,\n        \"Tmedia\":{\"$avg\":\"$temperatura\"},\n        \"Tmax\":  {\"$max\":\"$temperatura\"},\n        \"Tmin\":  {\"$min\":\"$temperatura\"},\n        \"datos\": {\"$sum\":1}\n    }}\n    ];\n}else{\n    msg.payload=\n    [\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)} } },\n    { \"$project\": {\n            \"temperatura\": \"$DHT11.temp\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": 0,\n        \"Tmedia\":{\"$avg\":\"$temperatura\"},\n        \"Tmax\":  {\"$max\":\"$temperatura\"},\n        \"Tmin\":  {\"$min\":\"$temperatura\"},\n        \"datos\": {\"$sum\":1}\n    }}\n    ];\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 410,
+        "y": 720,
+        "wires": [
+            [
+                "eb8bf028.458808"
+            ]
+        ]
+    },
+    {
+        "id": "eb8bf028.458808",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 660,
+        "y": 720,
+        "wires": [
+            [
+                "e83fb01e.51c52",
+                "e8c265bd.e538",
+                "efe689af.dd506",
+                "892c70d0.4f0aa8"
+            ]
+        ]
+    },
+    {
+        "id": "e83fb01e.51c52",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Temperatura media",
+        "format": "{{msg.payload[0].Tmedia | number:1 }}ºC",
+        "layout": "row-left",
+        "x": 1010,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "e8c265bd.e538",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 10,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Temperatura  máxima",
+        "format": "{{msg.payload[0].Tmax | number:1 }}ºC",
+        "layout": "row-left",
+        "x": 1020,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "efe689af.dd506",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 12,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Temperatura  mínima",
+        "format": "{{msg.payload[0].Tmin | number:1 }}ºC",
+        "layout": "row-left",
+        "x": 1020,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "27c212c0.f9d67e",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Controles para seleccionar fechas",
+        "info": "",
+        "x": 160,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "d2c1a4e2.9b6158",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Consultas agregadas",
+        "info": "",
+        "x": 128.78997802734375,
+        "y": 662.366455078125,
+        "wires": []
+    },
+    {
+        "id": "892c70d0.4f0aa8",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 14,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Número de datos",
+        "format": "{{msg.payload[0].datos }} muestras",
+        "layout": "row-left",
+        "x": 1010,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "4600e32c.85e1ac",
+        "type": "ui_date_picker",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "label": "Fecha de inicio",
+        "group": "c13a8500.6a285",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "topic": "",
+        "x": 140,
+        "y": 380,
+        "wires": [
+            [
+                "9490c934.f90248"
+            ]
+        ]
+    },
+    {
+        "id": "ea088e1b.43fc9",
+        "type": "ui_date_picker",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "label": "Fecha de final",
+        "group": "c13a8500.6a285",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "topic": "",
+        "x": 140,
+        "y": 420,
+        "wires": [
+            [
+                "d873e1f2.8b6a98"
+            ]
+        ]
+    },
+    {
+        "id": "574ceead.16b12",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Ultimo valor recibido",
+        "info": "",
+        "x": 110,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "3df5970f.1159",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Último valor",
+        "func": "if(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n    msg.payload={};\n}else{\n    msg.payload={\"ChipID\": {\"$eq\": global.get(\"ESP\").substring(3)}};\n}\n\nmsg.limit=1;\nmsg.sort = {\"date\" : -1}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 240,
+        "wires": [
+            [
+                "d7672966.70772"
+            ]
+        ]
+    },
+    {
+        "id": "143fda47.45564e",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Temperatura",
+        "info": "",
+        "x": 96.11666870117188,
+        "y": 708.5167236328125,
+        "wires": []
+    },
+    {
+        "id": "6c211b16.371d0c",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "agreaga todo",
+        "func": "// fecha por defecto es hoy\nvar ahora = new Date();\nif (msg.payload === 0){ //Ultima semana\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 7);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else if (msg.payload === 1){ //Ultimo dia\n    var desde = new Date();\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n} else if (msg.payload === 2){ //Ultimo mes\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 30);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else {\n    var desde = new Date(global.get(\"desde\") || ahora);\n    var hasta = new Date(global.get(\"hasta\") || ahora); \n\n    global.set(\"desde\", desde)\n    global.set(\"hasta\", hasta)\n}\n\n// pillo los globales si los hay, si no la fecha de hoy\nvar desde = new Date(global.get(\"desde\"));\nvar hasta = new Date(global.get(\"hasta\"));\n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),1,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),24,59,59,99);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": 0,\n        \"Hmedia\":{\"$avg\":\"$humedad\"},\n        \"Hmax\":  {\"$max\":\"$humedad\"},\n        \"Hmin\":  {\"$min\":\"$humedad\"},\n        \"datos\": {\"$sum\":1}\n    }}\n];\n\n}else{\n    \nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)} } },\n    { \"$project\": {\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": 0,\n        \"Hmedia\":{\"$avg\":\"$humedad\"},\n        \"Hmax\":  {\"$max\":\"$humedad\"},\n        \"Hmin\":  {\"$min\":\"$humedad\"},\n        \"datos\": {\"$sum\":1}\n    }}\n];\n\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 410,
+        "y": 1020,
+        "wires": [
+            [
+                "51af2ce3.5484cc"
+            ]
+        ]
+    },
+    {
+        "id": "f9603dd8.9b167",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "agrega por días",
+        "func": "// fecha por defecto es hoy\nvar ahora = new Date();\nif (msg.payload === 0){ //Ultima semana\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 7);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else if (msg.payload === 1){ //Ultimo dia\n    var desde = new Date();\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n} else if (msg.payload === 2){ //Ultimo mes\n    var desde = new Date(ahora);\n    desde.setDate(desde.getDate() - 30);\n    \n    global.set(\"desde\", desde)\n    global.set(\"hasta\", ahora)\n}else {\n    var desde = new Date(global.get(\"desde\") || ahora);\n    var hasta = new Date(global.get(\"hasta\") || ahora); \n\n    global.set(\"desde\", desde)\n    global.set(\"hasta\", hasta)\n}\n\n// pillo los globales si los hay, si no la fecha de hoy\nvar desde = new Date(global.get(\"desde\"));\nvar hasta = new Date(global.get(\"hasta\"));\n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),1,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),24,59,59,99);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n        \"date\": 1,\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": { \n        \"$dateFromParts\" : {\n            \"year\": { \"$year\": \"$date\" }, \n            \"month\": { \"$month\": \"$date\" },\n            \"day\": { \"$dayOfMonth\": \"$date\" }\n        }},\n\n        \"Hmedia\":{\"$avg\":\"$humedad\"},\n        \"Hmax\":  {\"$max\":\"$humedad\"},\n        \"Hmin\":  {\"$min\":\"$humedad\"},\n        \"datos\": {\"$sum\":1},\n    }},\n    { \"$sort\": {\"_id\": 1} }\n];\n\n}else{\n \nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)} } },\n    { \"$project\": {\n        \"date\": 1,\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$group\": {\n        \"_id\": { \n        \"$dateFromParts\" : {\n            \"year\": { \"$year\": \"$date\" }, \n            \"month\": { \"$month\": \"$date\" },\n            \"day\": { \"$dayOfMonth\": \"$date\" }\n        }},\n\n        \"Hmedia\":{\"$avg\":\"$humedad\"},\n        \"Hmax\":  {\"$max\":\"$humedad\"},\n        \"Hmin\":  {\"$min\":\"$humedad\"},\n        \"datos\": {\"$sum\":1},\n    }},\n    { \"$sort\": {\"_id\": 1} }\n]; \n    \n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 400,
+        "y": 1100,
+        "wires": [
+            [
+                "6b833bb6.6e583c"
+            ]
+        ]
+    },
+    {
+        "id": "1ae5322f.a933b6",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Humedad",
+        "info": "",
+        "x": 77.11672973632812,
+        "y": 980.716796875,
+        "wires": []
+    },
+    {
+        "id": "51af2ce3.5484cc",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 660,
+        "y": 1020,
+        "wires": [
+            [
+                "1f6898f2.17abd7",
+                "5f8a9401.e32084",
+                "cb67fc17.c758e8"
+            ]
+        ]
+    },
+    {
+        "id": "1f6898f2.17abd7",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humedad media",
+        "format": "{{msg.payload[0].Hmedia | number:1 }}%",
+        "layout": "row-left",
+        "x": 1020,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "5f8a9401.e32084",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 11,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humedad máxima ",
+        "format": "{{msg.payload[0].Hmax | number:1 }}%",
+        "layout": "row-left",
+        "x": 1030,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "cb67fc17.c758e8",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "order": 13,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humedad mínima",
+        "format": "{{msg.payload[0].Hmin | number:1 }}%",
+        "layout": "row-left",
+        "x": 1030,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "6b833bb6.6e583c",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 660,
+        "y": 1100,
+        "wires": [
+            [
+                "afbf3afa.24e85"
+            ]
+        ]
+    },
+    {
+        "id": "afbf3afa.24e85",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "genera datos gráfica",
+        "func": "var arrayavg=[];\nvar arraymax=[];\nvar arraymin=[];\n\n// los arrays usados en la represenstación gráfica deben contener objetos JSON con dos campos: {x , y}\n// en x debemos poner la hora en formato \"timestamp\". Si tenemos un objeto fecha se puede convertir usando el método getTime()\n// en y debemos poner el valor de la variable\n// mas info en: https://github.com/node-red/node-red-dashboard/blob/master/Charts.md\n\nif(Array.isArray(msg.payload) && msg.payload.length>0)\n{\n    for (var i = 0; i < msg.payload.length; i++) { // añade datos a los array\n        arrayavg.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Hmedia.toFixed(2)});\n        arraymax.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Hmax.toFixed(2)});\n        arraymin.push({x : msg.payload[i]._id.getTime() , y : msg.payload[i].Hmin.toFixed(2)});\n    }\n}\n    \nmsg.payload = [{\n        \"series\":[\"H.media\",\"H.max\",\"H.min\"],\n        \"data\":[arrayavg, arraymax, arraymin],\n        \"labels\":[\"\"]\n        }];\n\nreturn msg;  ",
+        "outputs": "1",
+        "noerr": 0,
+        "x": 980,
+        "y": 1100,
+        "wires": [
+            [
+                "a97b138f.4dc8d"
+            ]
+        ]
+    },
+    {
+        "id": "a97b138f.4dc8d",
+        "type": "ui_chart",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "c13a8500.6a285",
+        "order": 16,
+        "width": "9",
+        "height": "6",
+        "label": "Humedades",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "D/M",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#008000",
+            "#ff0000",
+            "#0080ff",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1190,
+        "y": 1100,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "7ba824b5.aa102c",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Evolución histórica 24 últimas horas",
+        "info": "",
+        "x": 160,
+        "y": 1625,
+        "wires": []
+    },
+    {
+        "id": "178eb172.fa96ef",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "agreaga todo",
+        "func": "// fecha por defecto es hoy\nvar ahora = new Date();\n// Fecha desde\nvar desde = new Date(ahora);\ndesde.setDate(desde.getDate() - 1);\n// Fecha hasta\nvar hasta=new Date(ahora);\n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),1,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),24,59,59,99);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n        \"temperatura\": \"$DHT11.temp\",\n        \"humedad\": \"$DHT11.hum\",\n        \"date\": \"$date\"\n        }\n    }\n];\n\n}else{\n \nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)} } },\n    { \"$project\": {\n        \"temperatura\": \"$DHT11.temp\",\n        \"humedad\": \"$DHT11.hum\",\n        \"date\": \"$date\"\n        }\n    }\n];\n    \n}    \n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 300,
+        "y": 1705,
+        "wires": [
+            [
+                "f2d01895.5599b"
+            ]
+        ]
+    },
+    {
+        "id": "f2d01895.5599b",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 570,
+        "y": 1705,
+        "wires": [
+            [
+                "3f01a802.cd3ce8"
+            ]
+        ]
+    },
+    {
+        "id": "11abf9ea.86f2fe",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 110,
+        "y": 1705,
+        "wires": [
+            [
+                "178eb172.fa96ef"
+            ]
+        ]
+    },
+    {
+        "id": "6c4ad737.83ae2",
+        "type": "ui_button",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "c13a8500.6a285",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Ultima Semana",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 338.2169494628906,
+        "y": 462.5731201171875,
+        "wires": [
+            [
+                "e8a47747.998b9"
+            ]
+        ]
+    },
+    {
+        "id": "619156c5.4f4998",
+        "type": "ui_button",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "c13a8500.6a285",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Último día",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 360,
+        "y": 500,
+        "wires": [
+            [
+                "e8a47747.998b9"
+            ]
+        ]
+    },
+    {
+        "id": "98f2b864.77f1b8",
+        "type": "ui_button",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "c13a8500.6a285",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Último mes",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "2",
+        "payloadType": "num",
+        "topic": "",
+        "x": 350,
+        "y": 540,
+        "wires": [
+            [
+                "e8a47747.998b9"
+            ]
+        ]
+    },
+    {
+        "id": "d83488da.a7caf8",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "consulta",
+        "func": "// pillo los globales si los hay, si no la fecha de hoy\nvar desde = new Date(global.get(\"desde\"));\nvar hasta = new Date(global.get(\"hasta\"));\n\n// el día de inicio desde las cero horas\nvar inicio = new Date(desde.getFullYear(),desde.getMonth(),desde.getDate(),0,0,0,0);\n// el día final es hasta final del día\nvar final = new Date(hasta.getFullYear(),hasta.getMonth(),hasta.getDate(),23,59,59,999);\n\nif(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n\nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final } } },\n    { \"$project\": {\n        \"_id\": 0,\n        \"date\": \"$date\",\n        \"ChipID\": \"$ChipID\",\n        \"temperatura\": \"$DHT11.temp\",\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$sort\": {\"date\": 1} }\n];\n\n}else{\n    \nmsg.payload=\n[\n    { \"$match\": { \"date\": { \"$gte\": inicio , \"$lte\": final }, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)}  } },\n    { \"$project\": {\n        \"_id\": 0,\n        \"date\": \"$date\",\n        \"ChipID\": \"$ChipID\",\n        \"temperatura\": \"$DHT11.temp\",\n        \"humedad\": \"$DHT11.hum\"\n        }\n    },\n    { \"$sort\": {\"date\": 1} }\n];\n\n    \n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 1225,
+        "wires": [
+            [
+                "d9c1e168.73f4a8"
+            ]
+        ]
+    },
+    {
+        "id": "2fe77edb.60ed62",
+        "type": "http in",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "url": "/DatosESP",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 1225,
+        "wires": [
+            [
+                "d83488da.a7caf8"
+            ]
+        ]
+    },
+    {
+        "id": "ce23bb17.810da",
+        "type": "ui_template",
+        "z": "f8acce6d.f9c8d8",
+        "group": "c13a8500.6a285",
+        "name": "",
+        "order": 7,
+        "width": "0",
+        "height": "0",
+        "format": "<style>\n.button {\n    text-align: center;\n    font: bold 17px Arial;\n    text-decoration: none;\n    background-color: #339966;\n    color: white;\n    padding: 8px 10px;\n    border: 2px solid #CCCCCC;\n  }\n  \n  .button:hover\n  {\n   background-color: #26734d;\n  }\n\n</style>\n<a href=\"/DatosESP\" class=\"button\">Descarga registros en CSV (EXCEL)</a>\n",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 80,
+        "y": 1525,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d9c1e168.73f4a8",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "DatosESP",
+        "operation": "aggregate",
+        "x": 577,
+        "y": 1223,
+        "wires": [
+            [
+                "bc4cbeab.218b2"
+            ]
+        ]
+    },
+    {
+        "id": "8f489cce.2cc0f",
+        "type": "csv",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "sep": ";",
+        "hdrin": "",
+        "hdrout": true,
+        "multi": "one",
+        "ret": "\\r\\n",
+        "temp": "date, ChipID, temperatura, humedad",
+        "skip": 0,
+        "x": 1030,
+        "y": 1225,
+        "wires": [
+            [
+                "8a1f42db.277598"
+            ]
+        ]
+    },
+    {
+        "id": "23769072.3812b",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Botón en HTML para lanzar descarga de fichero",
+        "info": "",
+        "x": 201.99990844726562,
+        "y": 1474.7001953125,
+        "wires": []
+    },
+    {
+        "id": "f8b76c1e.2c835",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Flujo para descarga de fichero",
+        "info": "",
+        "x": 140,
+        "y": 1165,
+        "wires": []
+    },
+    {
+        "id": "8a1f42db.277598",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Unicode y separador",
+        "func": "if(global.get(\"separador_decimal\")==\"punto\")\n{\n    msg.payload='\\ufeff'+msg.payload;\n\n}\nelse\n{\n    msg.payload='\\ufeff'+(msg.payload).replace(/\\./g,\",\");\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1200,
+        "y": 1225,
+        "wires": [
+            [
+                "a051db9d.0b9b5"
+            ]
+        ]
+    },
+    {
+        "id": "a051db9d.0b9b5",
+        "type": "http response",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "statusCode": "",
+        "headers": {
+            "Content-Disposition": "attachment; filename=registros.csv"
+        },
+        "x": 1370,
+        "y": 1225,
+        "wires": []
+    },
+    {
+        "id": "733eff74.266dd8",
+        "type": "ui_switch",
+        "z": "f8acce6d.f9c8d8",
+        "name": "separdor decimal",
+        "label": "{{msg.topic}}",
+        "tooltip": "",
+        "group": "c13a8500.6a285",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": "false",
+        "topic": "",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 755.11669921875,
+        "y": 1434.5999755859375,
+        "wires": [
+            [
+                "107539dd.2619a6"
+            ]
+        ]
+    },
+    {
+        "id": "d3b1b9f.22b3c48",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 158.11379623413086,
+        "y": 1379.5118112564087,
+        "wires": [
+            [
+                "107539dd.2619a6"
+            ]
+        ]
+    },
+    {
+        "id": "107539dd.2619a6",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "set global separador_decimal",
+        "func": "if(msg.payload===true)\n{\n    global.set(\"separador_decimal\",\"coma\");\n    msg.topic=\"separador decimal = coma\";\n}\nelse\n{\n    global.set(\"separador_decimal\",\"punto\");\n    msg.topic=\"separador decimal = punto\";\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 486.12518310546875,
+        "y": 1380.219183921814,
+        "wires": [
+            [
+                "733eff74.266dd8"
+            ]
+        ]
+    },
+    {
+        "id": "54aa3980.c62d68",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Selector de separador decimal",
+        "info": "",
+        "x": 140,
+        "y": 1325,
+        "wires": []
+    },
+    {
+        "id": "754e4b30.62a10c",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Log ",
+        "info": "",
+        "x": 70,
+        "y": 1785,
+        "wires": []
+    },
+    {
+        "id": "e01b28d5.76b87",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "log",
+        "operation": "find",
+        "x": 550,
+        "y": 1883,
+        "wires": [
+            [
+                "9a440aa2.1f271"
+            ]
+        ]
+    },
+    {
+        "id": "12dd7b87.38cf2c",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 110,
+        "y": 1883,
+        "wires": [
+            [
+                "1dde14cc.52ed23"
+            ]
+        ]
+    },
+    {
+        "id": "1dde14cc.52ed23",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Filtrar error",
+        "func": "if(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n    msg.payload={\"Tipo\": {\"$eq\":\"Error\"}};\n}else{\n    msg.payload={\"Tipo\": {\"$eq\":\"Error\"}, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)}};\n}\n\nmsg.sort = {\"date\" : -1}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 310,
+        "y": 1883,
+        "wires": [
+            [
+                "e01b28d5.76b87"
+            ]
+        ]
+    },
+    {
+        "id": "445b5ef7.80e56",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Errores",
+        "info": "",
+        "x": 69,
+        "y": 1837,
+        "wires": []
+    },
+    {
+        "id": "d099615a.aba948",
+        "type": "template",
+        "z": "f8acce6d.f9c8d8",
+        "name": "lista en formato html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "\n<ul>\n{{#payload}}\n    <li><b>ESP{{ChipID}}:</b> {{Mensaje}} - <b>{{date}}</b> </li>\n{{/payload}}\n</ul>",
+        "output": "str",
+        "x": 1120,
+        "y": 1883,
+        "wires": [
+            [
+                "34207ca7.abbd94"
+            ]
+        ]
+    },
+    {
+        "id": "34207ca7.abbd94",
+        "type": "ui_template",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "name": "Errores",
+        "order": 2,
+        "width": "8",
+        "height": "6",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1320,
+        "y": 1883,
+        "wires": [
+            [
+                "aa3cc53f.adb8a8"
+            ]
+        ]
+    },
+    {
+        "id": "9a440aa2.1f271",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Cambio fecha",
+        "func": "for (var i=0; i<msg.payload.length; i++){\n    fecha = msg.payload[i].date;\n    mes = fecha.getMonth() + 1;\n    dia = fecha.getDate();\n    hora = fecha.getHours();\n    minutos = fecha.getMinutes();\n    segundos = fecha.getSeconds();\n    if (mes<10) mes = \"0\" + mes;\n    if (dia<10) dia = \"0\" + dia;\n    if (hora<10) hora = \"0\" + hora;\n    if (minutos<10) minutos = \"0\" + minutos;  \n    if (segundos<10) segundos = \"0\" + segundos;    \n    fecha2 = dia + \"/\" + mes + \"/\" + fecha.getFullYear() + \" \" + hora + \":\" + minutos + \":\" + segundos;\n    msg.payload[i].date = fecha2;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 900,
+        "y": 1883,
+        "wires": [
+            [
+                "d099615a.aba948"
+            ]
+        ]
+    },
+    {
+        "id": "3f01a802.cd3ce8",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Preparar gráfica",
+        "func": "var temperatura=[];\nvar humedad=[];\n\n// los arrays usados en la represenstación gráfica deben contener objetos JSON con dos campos: {x , y}\n// en x debemos poner la hora en formato \"timestamp\". Si tenemos un objeto fecha se puede convertir usando el método getTime()\n// en y debemos poner el valor de la variable\n// mas info en: https://github.com/node-red/node-red-dashboard/blob/master/Charts.md\n\nif(Array.isArray(msg.payload) && msg.payload.length>0)\n{\n    for (var i = 0; i < msg.payload.length; i++) { // añade datos a los array\n        temperatura.push({x : msg.payload[i].date , y : msg.payload[i].temperatura});\n        humedad.push({x : msg.payload[i].date , y : msg.payload[i].humedad});\n    }\n}\n    \nmsg.payload = [{\n        \"series\":[\"Temperatura\",\"Humedad\"],\n        \"data\":[temperatura, humedad],\n        \"labels\":[\"\"]\n        }];\n\nreturn msg; ",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 900,
+        "y": 1705,
+        "wires": [
+            [
+                "64c10eb5.69c8a8"
+            ]
+        ]
+    },
+    {
+        "id": "64c10eb5.69c8a8",
+        "type": "ui_chart",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "1af33dfc.092a92",
+        "order": 5,
+        "width": "9",
+        "height": "6",
+        "label": "Evolución las últimas 24 horas",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "5",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#008000",
+            "#ff0000",
+            "#0080ff",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1150,
+        "y": 1705,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "bc4cbeab.218b2",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Cambio fecha",
+        "func": "for (var i=0; i<msg.payload.length; i++){\n    fecha = msg.payload[i].date;\n    mes = fecha.getMonth() + 1;\n    dia = fecha.getDate();\n    hora = fecha.getHours();\n    minutos = fecha.getMinutes();\n    segundos = fecha.getSeconds();\n    if (mes<10) mes = \"0\" + mes;\n    if (dia<10) dia = \"0\" + dia;\n    if (hora<10) hora = \"0\" + hora;\n    if (minutos<10) minutos = \"0\" + minutos;  \n    if (segundos<10) segundos = \"0\" + segundos;    \n    fecha2 = dia + \"/\" + mes + \"/\" + fecha.getFullYear() + \"-\" + hora + \":\" + minutos + \":\" + segundos;\n    msg.payload[i].date = fecha2;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 860,
+        "y": 1225,
+        "wires": [
+            [
+                "8f489cce.2cc0f"
+            ]
+        ]
+    },
+    {
+        "id": "1d810faa.efd6b8",
+        "type": "change",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "ESP",
+                "pt": "global",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "3df5970f.1159",
+                "e2a9174e.fef438"
+            ]
+        ]
+    },
+    {
+        "id": "c663011b.165c3",
+        "type": "ui_dropdown",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "label": "Seleccióna la ESP",
+        "tooltip": "",
+        "place": "",
+        "group": "1af33dfc.092a92",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "options": [
+            {
+                "label": "Todas las ESPs",
+                "value": "0",
+                "type": "str"
+            },
+            {
+                "label": "ESP455863",
+                "value": "ESP455863",
+                "type": "str"
+            },
+            {
+                "label": "ESP418957",
+                "value": "ESP418957",
+                "type": "str"
+            },
+            {
+                "label": "ESP6531899",
+                "value": "ESP6531899",
+                "type": "str"
+            },
+            {
+                "label": "ESP377143",
+                "value": "ESP377143",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "",
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "1d810faa.efd6b8"
+            ]
+        ]
+    },
+    {
+        "id": "bd57be55.1b5728",
+        "type": "link in",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "links": [
+            "e2a9174e.fef438"
+        ],
+        "x": 174,
+        "y": 1777,
+        "wires": [
+            [
+                "178eb172.fa96ef",
+                "1dde14cc.52ed23",
+                "95df3ee9.c18e58"
+            ]
+        ]
+    },
+    {
+        "id": "e2a9174e.fef438",
+        "type": "link out",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "links": [
+            "bd57be55.1b5728",
+            "166b0304.5667ad",
+            "2b4f8a42.e64206"
+        ],
+        "x": 555,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "6ced7d79.d6c804",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "log",
+        "operation": "find",
+        "x": 610,
+        "y": 1997,
+        "wires": [
+            [
+                "142b5be.fcec3a4"
+            ]
+        ]
+    },
+    {
+        "id": "43a2f3b6.6ebb94",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 110,
+        "y": 1998,
+        "wires": [
+            [
+                "95df3ee9.c18e58"
+            ]
+        ]
+    },
+    {
+        "id": "95df3ee9.c18e58",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Filtrar eventos",
+        "func": "if(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n    msg.payload={\"Tipo\": {\"$eq\":\"Evento\"}};\n}else{\n    msg.payload={\"Tipo\": {\"$eq\":\"Evento\"}, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)}};\n}\n\nmsg.sort = {\"date\" : -1};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 320,
+        "y": 1998,
+        "wires": [
+            [
+                "6ced7d79.d6c804"
+            ]
+        ]
+    },
+    {
+        "id": "1c4d5dd1.02f942",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Eventos",
+        "info": "",
+        "x": 80,
+        "y": 1938,
+        "wires": []
+    },
+    {
+        "id": "dc5fbc98.54dcb8",
+        "type": "template",
+        "z": "f8acce6d.f9c8d8",
+        "name": "lista en formato html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "\n<ul>\n{{#payload}}\n    <li><b>ESP{{ChipID}}:</b> {{Mensaje}} - <b>{{date}}</b> </li>\n{{/payload}}\n</ul>",
+        "output": "str",
+        "x": 1120,
+        "y": 1998,
+        "wires": [
+            [
+                "8a8189b5.12c208"
+            ]
+        ]
+    },
+    {
+        "id": "8a8189b5.12c208",
+        "type": "ui_template",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "name": "Eventos",
+        "order": 4,
+        "width": "8",
+        "height": "6",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1374,
+        "y": 1999,
+        "wires": [
+            [
+                "ae41860.0ed98f8"
+            ]
+        ]
+    },
+    {
+        "id": "142b5be.fcec3a4",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Cambio fecha",
+        "func": "for (var i=0; i<msg.payload.length; i++){\n    fecha = msg.payload[i].date;\n    mes = fecha.getMonth() + 1;\n    dia = fecha.getDate();\n    hora = fecha.getHours();\n    minutos = fecha.getMinutes();\n    segundos = fecha.getSeconds();\n    if (mes<10) mes = \"0\" + mes;\n    if (dia<10) dia = \"0\" + dia;\n    if (hora<10) hora = \"0\" + hora;\n    if (minutos<10) minutos = \"0\" + minutos;  \n    if (segundos<10) segundos = \"0\" + segundos;    \n    fecha2 = dia + \"/\" + mes + \"/\" + fecha.getFullYear() + \" \" + hora + \":\" + minutos + \":\" + segundos;\n    msg.payload[i].date = fecha2;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 900,
+        "y": 1998,
+        "wires": [
+            [
+                "dc5fbc98.54dcb8"
+            ]
+        ]
+    },
+    {
+        "id": "7686c254.303414",
+        "type": "template",
+        "z": "f8acce6d.f9c8d8",
+        "name": "lista en formato html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "{{#payload}}\n<h4>Última modificación: {{date}} </h4>\n{{/payload}}",
+        "output": "str",
+        "x": 1220,
+        "y": 180,
+        "wires": [
+            [
+                "cb8fbe48.43b23"
+            ]
+        ]
+    },
+    {
+        "id": "cb8fbe48.43b23",
+        "type": "ui_template",
+        "z": "f8acce6d.f9c8d8",
+        "group": "1af33dfc.092a92",
+        "name": "Fecha",
+        "order": 4,
+        "width": "8",
+        "height": "1",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1390,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b5743d8.c73f4c",
+        "type": "ui_gauge",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "1af33dfc.092a92",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperatura",
+        "label": "ºC",
+        "format": "{{msg.payload[0].DHT11.temp}}",
+        "min": 0,
+        "max": "40",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 1010,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "71b9a452.f2814c",
+        "type": "ui_gauge",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "group": "1af33dfc.092a92",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "gtype": "donut",
+        "title": "Humedad",
+        "label": "%",
+        "format": "{{msg.payload[0].DHT11.hum}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#06a2ae",
+            "#268dbf",
+            "#3004fd"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 1000,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "532ab37e.17bac4",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Cambio fecha",
+        "func": "for (var i=0; i<msg.payload.length; i++){\n    fecha = msg.payload[i].date;\n    mes = fecha.getMonth() + 1;\n    dia = fecha.getDate();\n    hora = fecha.getHours();\n    minutos = fecha.getMinutes();\n    segundos = fecha.getSeconds();\n    if (mes<10) mes = \"0\" + mes;\n    if (dia<10) dia = \"0\" + dia;\n    if (hora<10) hora = \"0\" + hora;\n    if (minutos<10) minutos = \"0\" + minutos;  \n    if (segundos<10) segundos = \"0\" + segundos;    \n    fecha2 = dia + \"/\" + mes + \"/\" + fecha.getFullYear() + \" \" + hora + \":\" + minutos + \":\" + segundos;\n    msg.payload[i].date = fecha2;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1020,
+        "y": 180,
+        "wires": [
+            [
+                "7686c254.303414"
+            ]
+        ]
+    },
+    {
+        "id": "f70cd9d4.64d7d8",
+        "type": "debug",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 848,
+        "y": 112,
+        "wires": []
+    },
+    {
+        "id": "ae41860.0ed98f8",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Eventos",
+        "format": "",
+        "layout": "row-spread",
+        "x": 1586,
+        "y": 2002,
+        "wires": []
+    },
+    {
+        "id": "aa3cc53f.adb8a8",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Errores",
+        "format": "",
+        "layout": "row-spread",
+        "x": 1535,
+        "y": 1872,
+        "wires": []
+    },
+    {
+        "id": "c8f98120.3806f8",
+        "type": "mongodb in",
+        "z": "f8acce6d.f9c8d8",
+        "mongodb": "872cb31c.e771c",
+        "name": "",
+        "collection": "log",
+        "operation": "find",
+        "x": 606,
+        "y": 2128,
+        "wires": [
+            [
+                "2fdb1eaa.0fb4ca"
+            ]
+        ]
+    },
+    {
+        "id": "941ffedc.7da41",
+        "type": "inject",
+        "z": "f8acce6d.f9c8d8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 106,
+        "y": 2129,
+        "wires": [
+            [
+                "5b361098.3e3d7"
+            ]
+        ]
+    },
+    {
+        "id": "5b361098.3e3d7",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Filtrar alertas",
+        "func": "if(global.get(\"ESP\") === null || global.get(\"ESP\") === \"0\"){\n    msg.payload={\"Tipo\": {\"$eq\":\"Alerta\"}};\n}else{\n    msg.payload={\"Tipo\": {\"$eq\":\"Alerta\"}, \"ChipID\": { \"$eq\": global.get(\"ESP\").substring(3)}};\n}\n\nmsg.sort = {\"date\" : -1};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 316,
+        "y": 2129,
+        "wires": [
+            [
+                "c8f98120.3806f8"
+            ]
+        ]
+    },
+    {
+        "id": "3258c731.00f008",
+        "type": "comment",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Alertas",
+        "info": "",
+        "x": 66,
+        "y": 2069,
+        "wires": []
+    },
+    {
+        "id": "f4882a0e.4ec01",
+        "type": "template",
+        "z": "f8acce6d.f9c8d8",
+        "name": "lista en formato html",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "\n<ul>\n{{#payload}}\n    <li><b>ESP{{ChipID}}:</b> {{Mensaje}} - <b>{{date}}</b> </li>\n{{/payload}}\n</ul>",
+        "output": "str",
+        "x": 1116,
+        "y": 2129,
+        "wires": [
+            [
+                "20a35e09.274502"
+            ]
+        ]
+    },
+    {
+        "id": "2fdb1eaa.0fb4ca",
+        "type": "function",
+        "z": "f8acce6d.f9c8d8",
+        "name": "Cambio fecha",
+        "func": "for (var i=0; i<msg.payload.length; i++){\n    fecha = msg.payload[i].date;\n    mes = fecha.getMonth() + 1;\n    dia = fecha.getDate();\n    hora = fecha.getHours();\n    minutos = fecha.getMinutes();\n    segundos = fecha.getSeconds();\n    if (mes<10) mes = \"0\" + mes;\n    if (dia<10) dia = \"0\" + dia;\n    if (hora<10) hora = \"0\" + hora;\n    if (minutos<10) minutos = \"0\" + minutos;  \n    if (segundos<10) segundos = \"0\" + segundos;    \n    fecha2 = dia + \"/\" + mes + \"/\" + fecha.getFullYear() + \" \" + hora + \":\" + minutos + \":\" + segundos;\n    msg.payload[i].date = fecha2;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 896,
+        "y": 2129,
+        "wires": [
+            [
+                "f4882a0e.4ec01"
+            ]
+        ]
+    },
+    {
+        "id": "20a35e09.274502",
+        "type": "ui_template",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "name": "Alertas",
+        "order": 6,
+        "width": "8",
+        "height": "6",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1370,
+        "y": 2130,
+        "wires": [
+            [
+                "5ff73bec.ea1a54"
+            ]
+        ]
+    },
+    {
+        "id": "5ff73bec.ea1a54",
+        "type": "ui_text",
+        "z": "f8acce6d.f9c8d8",
+        "group": "5d938ea4.a50198",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Alertas",
+        "format": "",
+        "layout": "row-spread",
+        "x": 1582,
+        "y": 2133,
+        "wires": []
+    },
+    {
+        "id": "872cb31c.e771c",
+        "type": "mongodb",
+        "z": "",
+        "hostname": "iot.ac.uma.es",
+        "port": "27017",
+        "db": "IOT7",
+        "name": ""
+    },
+    {
+        "id": "c13a8500.6a285",
+        "type": "ui_group",
+        "z": "",
+        "name": "Consulta por rangos",
+        "tab": "7158178d.312978",
+        "order": 2,
+        "disp": true,
+        "width": "9",
+        "collapse": false
+    },
+    {
+        "id": "5d938ea4.a50198",
+        "type": "ui_group",
+        "z": "",
+        "name": "LOG",
+        "tab": "7158178d.312978",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "1af33dfc.092a92",
+        "type": "ui_group",
+        "z": "",
+        "name": "Datos ESP",
+        "tab": "7158178d.312978",
+        "order": 1,
+        "disp": true,
+        "width": "9",
+        "collapse": false
+    },
+    {
+        "id": "7158178d.312978",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Recuperación datos BBDD",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
